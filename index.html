@@ -92,54 +92,37 @@
         </article>
 
         <!-- DexScreener embeds for AU79 + SLVr (paste your pair URLs) -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>AU79</h3>
-            <span class="chip">DexScreener</span>
-          </div>
+       <!-- AU79 -->
+<article class="chart-card">
+  <div class="chart-head">
+    <h3>AU79</h3>
+    <span class="chip">DEX Live</span>
+  </div>
 
-          <!-- Replace the src with your AU79 DexScreener PAIR URL -->
-         <div class="dex-placeholder">
-  <div class="dex-title">AU79 (Solana)</div>
-  <p class="muted">
-    Live DEX pricing, liquidity, and volume are tracked above.
-  </p>
+  <div class="lw-wrap">
+    <div class="lw-chart" id="lw_au79"></div>
+    <div class="lw-actions">
+      <a class="dex-button" id="au79_link" href="#" target="_blank" rel="noopener">View on DexScreener →</a>
+      <span class="tiny muted" id="au79_note"></span>
+    </div>
+  </div>
+</article>
 
-  <a
-    class="dex-button"
-    href="https://dexscreener.com/solana/cqmwcyb7fgor8z7as56yxbqzwjy7mnactmj6wulhgv5h"
-    target="_blank"
-    rel="noopener"
-  >
-    View AU79 on DexScreener →
-  </a>
-</div>
+<!-- SLVr -->
+<article class="chart-card">
+  <div class="chart-head">
+    <h3>SLVr</h3>
+    <span class="chip">DEX Live</span>
+  </div>
 
-        </article>
-
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>SLVr</h3>
-            <span class="chip">DexScreener</span>
-          </div>
-
-          <!-- Replace the src with your SLVr DexScreener PAIR URL -->
-          <iframe
-            class="dex-embed"
-            id="dex_slvr"
-            title="SLVr DexScreener chart"
-            src=""
-            loading="lazy"
-            referrerpolicy="no-referrer"
-            allow="clipboard-write"
-          ></iframe>
-
-          <div class="tiny muted">
-            Paste your SLVr DexScreener pair link in <code>app.js</code>.
-          </div>
-        </article>
-      </div>
-    </section>
+  <div class="lw-wrap">
+    <div class="lw-chart" id="lw_slvr"></div>
+    <div class="lw-actions">
+      <a class="dex-button" id="slvr_link" href="#" target="_blank" rel="noopener">View on DexScreener →</a>
+      <span class="tiny muted" id="slvr_note"></span>
+    </div>
+  </div>
+</article>
 
     <!-- Methodology -->
     <section id="method" class="card">
