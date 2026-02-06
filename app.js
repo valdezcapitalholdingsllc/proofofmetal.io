@@ -4,9 +4,10 @@
 // Example of what to paste:
 // https://dexscreener.com/solana/<PAIR_OR_TOKEN_PATH>
 const DEXSCREENERS = {
-  AU79: "",  // <-- paste AU79 DexScreener pair url
-  SLVr: "",  // <-- paste SLVr DexScreener pair url
+  AU79: "https://dexscreener.com/solana/cqmwcyb7fgor8z7as56yxbqzwjy7mnactmj6wulhgv5h",
+  SLVr: "",
 };
+
 
 // =========
 // 2) TradingView symbols we’ll embed
