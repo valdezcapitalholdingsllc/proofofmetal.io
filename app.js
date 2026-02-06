@@ -44,7 +44,9 @@ function mountTV(containerId, symbol){
     container_id: containerId,
   });
 }
-
+{ container: "tv_kau", symbol: "KAUUSD" },
+{ container: "tv_cgo", symbol: "CGOUSD" },
+{ container: "tv_kag", symbol: "KAGUSD" },
 async function init(){
   setMeta();
   await loadTradingViewScript();
