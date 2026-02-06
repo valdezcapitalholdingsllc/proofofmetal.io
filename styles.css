@@ -171,6 +171,19 @@ p{line-height:1.55}
 .tv-chart > div, .tv-chart iframe{
   border-radius:10px;
 }
+.cmc-wrap{display:flex;flex-direction:column;gap:12px}
+.cmc-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  text-decoration:none;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
+}
+.btn:hover{transform: translateY(-1px)}
 
 .btn:hover{transform: translateY(-1px)}
 
