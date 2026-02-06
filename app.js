@@ -1,61 +1,69 @@
-const TV_WIDGETS = [
-  // PAXG spot chart
-  { container: "tv_paxg", symbol: "PAXGUSDT", title: "PAXG" },
+document.addEventListener("DOMContentLoaded", async () => {
+  const TV_WIDGETS = [
+    // PAXG spot chart
+    { container: "tv_paxg", symbol: "PAXGUSDT" },
 
-  // Metals perps (common TradingView symbols)
-  { container: "tv_xauusdt", symbol: "BINANCE:XAUUSDT.P", title: "XAUUSDT" },
-  { container: "tv_xagusdt", symbol: "BINANCE:XAGUSDT.P", title: "XAGUSDT" },
+    // Metals perps
+    { container: "tv_xauusdt", symbol: "BINANCE:XAUUSDT.P" },
+    { container: "tv_xagusdt", symbol: "BINANCE:XAGUSDT.P" },
 
-  // $GOLD — using a generic TradingView symbol. If you have the exact market, we can set EXCHANGE:SYMBOL.
-  { container: "tv_gold", symbol: "GOLDUSDT.P", title: "GOLD" },
-];
+    // $GOLD (still placeholder until we wire your token source)
+    { container: "tv_gold", symbol: "GOLDUSDT.P" },
 
-function el(id){ return document.getElementById(id); }
+    // Added tickers
+    { container: "tv_kau", symbol: "KAUUSD" },
+    { container: "tv_cgo", symbol: "CGOUSD" },
+    { container: "tv_kag", symbol: "KAGUSD" },
+  ];
 
-function setMeta(){
-  el("year").textContent = new Date().getFullYear();
-  el("lastUpdated").textContent = `Loaded: ${new Date().toLocaleString()}`;
-}
+  function el(id) { return document.getElementById(id); }
 
-function loadTradingViewScript(){
-  return new Promise((resolve) => {
-    if (window.TradingView) return resolve();
-    const s = document.createElement("script");
-    s.src = "https://s3.tradingview.com/tv.js";
-    s.async = true;
-    s.onload = resolve;
-    document.head.appendChild(s);
-  });
-}
+  function setMeta() {
+    const y = el("year");
+    const u = el("lastUpdated");
+    if (y) y.textContent = new Date().getFullYear();
+    if (u) u.textContent = `Loaded: ${new Date().toLocaleString()}`;
+  }
 
-function mountTV(containerId, symbol){
-  // TradingView supports "light" theme for white backgrounds. :contentReference[oaicite:4]{index=4}
-  new window.TradingView.widget({
-    autosize: true,
-    symbol,
-    interval: "30",
-    timezone: "Etc/UTC",
-    theme: "dark",
-    style: "1",
-    locale: "en",
-    enable_publishing: false,
-    hide_side_toolbar: false,
-    allow_symbol_change: true,
-    container_id: containerId,
-  });
-}
-{ container: "tv_kau", symbol: "KAUUSD" },
-{ container: "tv_cgo", symbol: "CGOUSD" },
-{ container: "tv_kag", symbol: "KAGUSD" },
-async function init(){
+  function loadTradingViewScript() {
+    return new Promise((resolve, reject) => {
+      if (window.TradingView) return resolve();
+      const s = document.createElement("script");
+      s.src = "https://s3.tradingview.com/tv.js";
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function mountTV(containerId, symbol) {
+    const target = el(containerId);
+    if (!target) {
+      console.warn("Missing container:", containerId);
+      return;
+    }
+
+    new window.TradingView.widget({
+      autosize: true,
+      symbol: symbol,
+      interval: "30",
+      timezone: "Etc/UTC",
+      theme: "dark",      // darker charts on a light site
+      style: "1",
+      locale: "en",
+      enable_publishing: false,
+      hide_side_toolbar: false,
+      allow_symbol_change: true,
+      container_id: containerId,
+    });
+  }
+
   setMeta();
   await loadTradingViewScript();
 
-  TV_WIDGETS.forEach(w => {
-    try { mountTV(w.container, w.symbol); }
-    catch (e) { console.warn("TradingView mount failed:", w.symbol, e); }
+  TV_WIDGETS.forEach(({ container, symbol }) => {
+    try { mountTV(container, symbol); }
+    catch (e) { console.warn("TradingView mount failed:", symbol, e); }
   });
-}
-
-init();
-
+});
