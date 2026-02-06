@@ -1,30 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Page meta ---
+  // Meta
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
   const updated = document.getElementById("lastUpdated");
   if (updated) updated.textContent = `Loaded: ${new Date().toLocaleString()}`;
 
-  // --- TradingView charts to mount ---
-  // If a chart is blank, swap symbol to the exact TradingView listing (EXCHANGE:SYMBOL)
+  // TradingView mounts
   const TV_WIDGETS = [
     { container: "tv_paxg", symbol: "PAXGUSDT" },
-
-    // Tokenized gold
     { container: "tv_xaut", symbol: "XAUTUSD" },
-
-    // Spot proxies / perps (common TradingView symbols)
     { container: "tv_xauusdt", symbol: "BINANCE:XAUUSDT.P" },
     { container: "tv_xagusdt", symbol: "BINANCE:XAGUSDT.P" },
-
-    // Kinesis / Comtech
     { container: "tv_kau", symbol: "KAUUSD" },
     { container: "tv_cgo", symbol: "CGOUSD" },
     { container: "tv_kag", symbol: "KAGUSD" },
-    { container: "tv_gold", symbol: "GOLDUSDT.P" },
 
-  function loadTradingViewScript() {
+    // $GOLD = placeholder proxy until we wire DexScreener/CMC by contract
+    { container: "tv_gold", symbol: "GOLDUSDT.P" },
+  ];
+
+  function loadTV() {
     return new Promise((resolve, reject) => {
       if (window.TradingView) return resolve();
       const s = document.createElement("script");
@@ -36,12 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function mountTV(containerId, symbol) {
-    const target = document.getElementById(containerId);
-    if (!target) {
-      console.warn("Missing chart container:", containerId);
-      return;
-    }
+  function mount(containerId, symbol) {
+    const el = document.getElementById(containerId);
+    if (!el) return console.warn("Missing chart container:", containerId);
 
     try {
       new window.TradingView.widget({
@@ -49,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         symbol,
         interval: "30",
         timezone: "Etc/UTC",
-        theme: "light",     // professional, not too dark
+        theme: "light",   // professional, not too dark
         style: "1",
         locale: "en",
         enable_publishing: false,
@@ -58,15 +51,11 @@ document.addEventListener("DOMContentLoaded", () => {
         container_id: containerId,
       });
     } catch (e) {
-      console.warn("TradingView mount failed:", symbol, e);
+      console.warn("TV mount failed:", symbol, e);
     }
   }
 
-  loadTradingViewScript()
-    .then(() => {
-      TV_WIDGETS.forEach(({ container, symbol }) => mountTV(container, symbol));
-    })
-    .catch((e) => {
-      console.error("TradingView script failed to load:", e);
-    });
+  loadTV()
+    .then(() => TV_WIDGETS.forEach(w => mount(w.container, w.symbol)))
+    .catch(err => console.error("TradingView failed to load:", err));
 });
