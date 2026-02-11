@@ -352,3 +352,136 @@ p{line-height:1.55}
   background: rgba(241,245,249,0.85);
   color:#0f172a;
 }
+/* =========================
+   Status Row (above charts)
+   ========================= */
+.status-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  margin:10px 0 12px;
+}
+
+.status-pill{
+  font-size:0.78rem;
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,0.10);
+  background: rgba(241,245,249,0.85);
+  color:#0f172a;
+  line-height:1.2;
+}
+
+/* Backed */
+.status-pill.backed{
+  background: rgba(16,185,129,0.10);
+  border-color: rgba(16,185,129,0.25);
+  color:#065f46;
+}
+
+/* Redeemable */
+.status-pill.redeem{
+  background: rgba(245,158,11,0.12);
+  border-color: rgba(245,158,11,0.28);
+  color:#7c4a03;
+}
+
+/* Network */
+.status-pill.net{
+  background: rgba(59,130,246,0.10);
+  border-color: rgba(59,130,246,0.22);
+  color:#1e3a8a;
+}
+
+/* Minimum redemption */
+.status-pill.min{
+  background: rgba(148,163,184,0.16);
+  border-color: rgba(148,163,184,0.35);
+  color:#334155;
+}
+
+/* Audit/Docs link aligns right on desktop */
+.status-link{
+  margin-left:auto;
+  font-size:0.82rem;
+  color: var(--text, #0f172a);
+  text-decoration:none;
+  border-bottom:1px dotted rgba(0,0,0,0.35);
+  padding:4px 0;
+}
+
+.status-link:hover{
+  border-bottom-color: rgba(0,0,0,0.75);
+}
+
+
+/* =========================
+   Premium vs Spot (below chart)
+   ========================= */
+.premium-box{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,0.08);
+  background: rgba(248,250,252,0.92);
+  font-size:0.9rem;
+  color:#0f172a;
+}
+
+
+/* =========================
+   Premium Heat Indicator
+   ========================= */
+.heat-row{
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+}
+
+.heat-badge{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:6px 12px;
+  font-size:0.82rem;
+  border:1px solid rgba(0,0,0,0.10);
+  background:#fff;
+  color:#0f172a;
+}
+
+/* Heat states */
+.heat-badge.discount{
+  background: rgba(16,185,129,0.10);
+  border-color: rgba(16,185,129,0.28);
+  color:#065f46;
+}
+
+.heat-badge.neutral{
+  background: rgba(148,163,184,0.16);
+  border-color: rgba(148,163,184,0.35);
+  color:#334155;
+}
+
+.heat-badge.premium{
+  background: rgba(239,68,68,0.10);
+  border-color: rgba(239,68,68,0.28);
+  color:#7f1d1d;
+}
+
+.heat-badge.nodata{
+  background: rgba(245,158,11,0.12);
+  border-color: rgba(245,158,11,0.28);
+  color:#7c4a03;
+}
+
+
+/* =========================
+   Mobile polish
+   ========================= */
+@media (max-width: 640px){
+  /* make link not fight for space */
+  .status-link{
+    margin-left:0;
+  }
+}
