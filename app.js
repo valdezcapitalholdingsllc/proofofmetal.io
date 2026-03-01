@@ -61,7 +61,14 @@ function toggleTheme() {
       document.head.appendChild(s);
     });
   }
+const initialTheme = getPreferredTheme();
+applyTheme(initialTheme);
 
+const toggleBtn = document.getElementById("themeToggle");
+if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
+
+// Mount charts with correct theme on load
+remountAllTradingView(initialTheme);
   function mountTV(containerId, symbol) {
     const el = document.getElementById(containerId);
     if (!el) return;
