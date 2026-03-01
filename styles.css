@@ -1,107 +1,48 @@
+/* =========================
+   THEME TOKENS (single source of truth)
+   ========================= */
 :root{
+  color-scheme: light dark;
+
+  /* Light */
   --bg:#FFF9F0;
   --card:#ffffff;
   --text:#0f172a;      /* slate-900 */
   --muted:#475569;     /* slate-600 */
   --line:#e2e8f0;      /* slate-200 */
-  --chip:#f1f5f9;      /* slate-100 */
   --shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
-  /* new */
-  --chartFrame: #0b1220;  /* deep navy/charcoal */
-  --chartBorder: rgba(15, 23, 42, 0.18);
-}
-}
-/* =========================
-   THEME TOKENS
-   ========================= */
-:root{
-  color-scheme: light dark;
 
-  --bg: #ffffff;
-  --bg-2: #f6f7f9;
-  --text: #111827;
-  --muted: #6b7280;
-
-  --card: #ffffff;
-  --border: rgba(17, 24, 39, .12);
-  --shadow: 0 10px 30px rgba(0,0,0,.06);
-
+  --chip: rgba(241,245,249,0.85);
+  --border: rgba(15, 23, 42, 0.12);
   --link: #0b5fff;
-  --chip-bg: rgba(11, 95, 255, .10);
-  --chip-text: #0b5fff;
+
+  /* Chart frame / mat behind TradingView */
+  --chartFrame: linear-gradient(180deg, rgba(245,247,250,1) 0%, rgba(236,239,244,1) 100%);
+  --chartBorder: rgba(15, 23, 42, 0.18);
 }
 
 /* Dark theme overrides */
 html[data-theme="dark"]{
-  --bg: #0b0f14;
-  --bg-2: #0f172a;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-
-  --card: #0f172a;
-  --border: rgba(229, 231, 235, .14);
-  --shadow: 0 10px 30px rgba(0,0,0,.35);
-
+  --bg:#0b0f14;
+  --card:#0f172a;
+  --text:#f1f5f9;      /* brighter for readability */
+  --muted:#cbd5e1;     /* brighter muted */
+  --line: rgba(226,232,240,0.14);
+  --border: rgba(226,232,240,0.18);
   --link: #7aa2ff;
-  --chip-bg: rgba(122, 162, 255, .15);
-  --chip-text: #c7d2fe;
+
+  --chip: rgba(148,163,184,0.16);
+  --shadow: 0 14px 40px rgba(0,0,0,0.45);
+
+  --chartFrame: #0b1220;
+  --chartBorder: rgba(226,232,240,0.20);
 }
 
 /* =========================
-   APPLY TOKENS
+   RESETS / BASE
    ========================= */
-body{
-  background: var(--bg);
-  color: var(--text);
-}
-
-a{ color: var(--link); }
-
-.muted{ color: var(--muted); }
-
-/* Your layout uses cards heavily */
-.card,
-.chart-card,
-.explain-card,
-.consider-card{
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
-
-/* If you have a wrapper area behind cards */
-.wrap{
-  background: transparent;
-}
-
-/* Chips (you use .chip) */
-.chip{
-  background: var(--chip-bg);
-  color: var(--chip-text);
-  border: 1px solid var(--border);
-}
-
-/* Optional: tone down header overlay in dark */
-html[data-theme="dark"] .header-overlay{
-  opacity: .65; /* tweak if needed */
-}
-
-/* Toggle button */
-.theme-toggle{
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  border-radius: 999px;
-  padding: 8px 10px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-.theme-toggle:focus{
-  outline: 2px solid var(--link);
-  outline-offset: 2px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
 
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -109,8 +50,37 @@ body{
   color:var(--text);
 }
 
-.wrap{max-width:1150px;margin:0 auto;padding:18px}
+a{ color:var(--link); }
+p{ line-height:1.55; }
 
+h1{ margin:0 0 10px; font-size:1.35rem; color:var(--text); }
+h2{ margin:0 0 12px; font-size:1.1rem; color:var(--text); }
+
+.muted{ color:var(--muted); }
+.tiny{ font-size:0.88rem; }
+
+/* =========================
+   LAYOUT
+   ========================= */
+.wrap{ max-width:1150px; margin:0 auto; padding:18px; }
+
+.section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+
+/* =========================
+   HEADER
+   ========================= */
 .site-header{
   position:relative;
   min-height:210px;
@@ -121,8 +91,19 @@ body{
 
 /* keep the banner readable */
 .header-overlay{
-  position:absolute; inset:0;
-  background:linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.45));
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    90deg,
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.18) 55%,
+    rgba(0,0,0,0.45)
+  );
+}
+
+/* optional: slightly stronger overlay in dark mode */
+html[data-theme="dark"] .header-overlay{
+  opacity:.70;
 }
 
 .header-inner{
@@ -136,20 +117,40 @@ body{
   gap:16px;
 }
 
-.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:#fff}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  text-decoration:none;
+  color:#fff;
+}
+
 .brand-logo{
-  width:58px;height:58px;border-radius:14px;
+  width:58px;
+  height:58px;
+  border-radius:14px;
   box-shadow:0 10px 30px rgba(0,0,0,0.30);
 }
+
 .brand-title{
   font-weight:800;
   letter-spacing:0.08em;
   text-transform:uppercase;
   font-size:1.02rem;
 }
-.brand-tagline{color:rgba(255,255,255,0.85);font-size:0.95rem;margin-top:3px}
 
-.nav{display:flex;gap:14px}
+.brand-tagline{
+  color:rgba(255,255,255,0.85);
+  font-size:0.95rem;
+  margin-top:3px;
+}
+
+.nav{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+
 .nav a{
   color:#fff;
   text-decoration:none;
@@ -162,8 +163,29 @@ body{
   border:1px solid rgba(255,255,255,0.18);
   background:rgba(0,0,0,0.10);
 }
-.nav a:hover{background:rgba(0,0,0,0.18)}
 
+.nav a:hover{ background:rgba(0,0,0,0.18); }
+
+/* =========================
+   THEME TOGGLE BUTTON (in nav)
+   ========================= */
+.theme-toggle{
+  border:1px solid rgba(255,255,255,0.22);
+  background:rgba(0,0,0,0.18);
+  color:#fff;
+  border-radius:999px;
+  padding:8px 10px;
+  cursor:pointer;
+}
+
+.theme-toggle:focus{
+  outline:2px solid rgba(255,255,255,0.70);
+  outline-offset:2px;
+}
+
+/* =========================
+   CARDS / SECTIONS
+   ========================= */
 .card{
   background:var(--card);
   border:1px solid var(--line);
@@ -173,42 +195,37 @@ body{
   margin-top:14px;
 }
 
-h1{margin:0 0 10px;font-size:1.35rem}
-h2{margin:0 0 12px;font-size:1.1rem}
-p{line-height:1.55}
-.muted{color:var(--muted)}
-.tiny{font-size:0.88rem}
-
-.section-head{
-  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-  margin-bottom:10px;
-}
-
-.grid-2{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-}
-@media (max-width: 980px){
-  .grid-2{grid-template-columns:1fr}
-  .nav{display:none}
-}
-
+/* =========================
+   CHART CARDS
+   ========================= */
 .chart-card{
-  background:#fff;
+  background:var(--card);
   border-radius:18px;
-  border:1px solid rgba(0, 0, 0, 0.06);
+  border:1px solid var(--line);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   padding:12px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+html[data-theme="dark"] .chart-card{
+  box-shadow: var(--shadow);
+}
+
+.chart-card:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme="dark"] .chart-card:hover{
+  box-shadow: 0 18px 52px rgba(0,0,0,0.55);
 }
 
 .chart-card-wide{
-  background:
-    linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #fafbfc 100%
-    );
+  background: linear-gradient(180deg, var(--card) 0%, rgba(250,251,252,0.80) 100%);
+}
+
+html[data-theme="dark"] .chart-card-wide{
+  background: linear-gradient(180deg, var(--card) 0%, rgba(15,23,42,0.85) 100%);
 }
 
 .chart-head{
@@ -216,9 +233,8 @@ p{line-height:1.55}
   align-items:center;
   justify-content:space-between;
   gap:10px;
-
   padding-bottom:8px;
-  border-bottom:1px solid rgba(0, 0, 0, 0.06);
+  border-bottom:1px solid var(--line);
   margin-bottom:10px;
 }
 
@@ -226,73 +242,99 @@ p{line-height:1.55}
   margin:0;
   font-weight:600;
   letter-spacing:0.02em;
+  color:var(--text);
 }
 
+.chart-head::after{
+  content:"";
+  display:block;
+  width:100%;
+  margin-top:8px;
+  height:1px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.12), rgba(0,0,0,0));
+}
+
+html[data-theme="dark"] .chart-head::after{
+  background: linear-gradient(90deg, rgba(226,232,240,0.18), rgba(0,0,0,0));
+}
+
+/* Chip */
 .chip{
   font-size:0.78rem;
-  color:#0f172a;
+  padding:5px 10px;
+  border-radius:999px;
   border:1px solid var(--line);
   background:var(--chip);
-  padding:5px 8px;
-  border-radius:999px;
+  color:var(--text);
 }
 
+/* TradingView container */
 .tv-chart{
   width:100%;
   height:380px;
   border-radius:14px;
   overflow:hidden;
 
-  /* Subtle metallic panel behind the chart */
-  background:
-    linear-gradient(
-      180deg,
-      rgba(245, 247, 250, 1) 0%,
-      rgba(236, 239, 244, 1) 100%
-    );
+  padding:6px; /* creates a subtle border mat */
+  background: var(--chartFrame);
+  border:1px solid var(--chartBorder);
 
-  border:1px solid rgba(0, 0, 0, 0.10);
-
-  /* Soft depth without going dark */
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.65),
     0 12px 28px rgba(15, 23, 42, 0.10);
 }
 
-.cmc-wrap{display:flex;flex-direction:column;gap:12px}
-.cmc-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+html[data-theme="dark"] .tv-chart{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 12px 28px rgba(0,0,0,0.50);
+}
 
-.btn{
-  display:inline-block;
-  padding:10px 14px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:#fff;
-  color:var(--text);
-  text-decoration:none;
-  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
-}
-.tv-chart{
-  padding: 6px; /* creates a subtle border mat */
-}
-.tv-chart > div, .tv-chart iframe{
+.tv-chart > div,
+.tv-chart iframe{
   border-radius:10px;
 }
-.cmc-wrap{display:flex;flex-direction:column;gap:12px}
-.cmc-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* =========================
+   COINMARKETCAP WIDGET AREA
+   ========================= */
+.cmc-wrap{ display:flex; flex-direction:column; gap:12px; }
+.cmc-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* Button */
 .btn{
   display:inline-block;
   padding:10px 14px;
   border-radius:12px;
   border:1px solid var(--line);
-  background:#fff;
+  background:var(--card);
   color:var(--text);
   text-decoration:none;
   box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
 }
+
+html[data-theme="dark"] .btn{
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+
+.btn:hover{ transform: translateY(-1px); }
+
+/* =========================
+   FOOTER
+   ========================= */
 .footer{
   margin-top:18px;
   border-top:1px solid rgba(0,0,0,0.06);
+}
+
+html[data-theme="dark"] .footer{
+  border-top-color: rgba(226,232,240,0.14);
 }
 
 .footer-inner{
@@ -322,9 +364,13 @@ p{line-height:1.55}
   height:38px;
   border-radius:12px;
   border:1px solid var(--line);
-  background:#fff;
+  background:var(--card);
   text-decoration:none;
   box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
+}
+
+html[data-theme="dark"] .footer-icon-link{
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
 }
 
 .footer-icon{
@@ -336,17 +382,9 @@ p{line-height:1.55}
 .footer-icon-link:hover .footer-icon{ fill: var(--text); }
 .footer-icon-link:hover{ transform: translateY(-1px); }
 
-/* Mobile: keep it visible */
-@media (max-width: 600px){
-  .footer-inner{ flex-direction:row; }
-}
-
-.btn:hover{transform: translateY(-1px)}
-
-.btn:hover{transform: translateY(-1px)}
-
-.footer{margin-top:18px;border-top:1px solid rgba(0,0,0,0.06)}
-.footer-inner{display:flex;justify-content:space-between;gap:12px}
+/* =========================
+   BADGES (if you use them)
+   ========================= */
 .badges{
   display:flex;
   gap:8px;
@@ -354,7 +392,6 @@ p{line-height:1.55}
   align-items:center;
 }
 
-/* Badge styles (light theme friendly) */
 .badge{
   display:inline-flex;
   align-items:center;
@@ -362,7 +399,7 @@ p{line-height:1.55}
   padding:4px 10px;
   font-size:0.78rem;
   border:1px solid var(--line);
-  background:#fff;
+  background:var(--card);
   color:var(--muted);
 }
 
@@ -371,77 +408,15 @@ p{line-height:1.55}
   background: rgba(16, 185, 129, 0.10);
   color: #065f46;
 }
-.chart-head{
-  border-bottom:1px solid rgba(0, 0, 0, 0.06);
-  padding-bottom:8px;
-}
-
-.chart-head h3{
-  font-weight:600;
-  letter-spacing:0.02em;
-}
-.chart-head::after{
-  content:"";
-  display:block;
-  margin-top:6px;
-  height:1px;
-  background:linear-gradient(
-    90deg,
-    rgba(0,0,0,0.12),
-    rgba(0,0,0,0)
-  );
-}
 
 .badge.warn{
   border-color: rgba(245, 158, 11, 0.35);
   background: rgba(245, 158, 11, 0.10);
   color: #7c4a03;
 }
-.chart-card{
-  background:#fff;
-  border-radius:18px;
-  border:1px solid rgba(0, 0, 0, 0.06);
-  box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.06);
-}
-.chart-card-wide{
-  background:
-    linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #fafbfc 100%
-    );
-}
-.chart-head::after{
-  content:"";
-  display:block;
-  width:100%;
-  margin-top:8px;
-  height:1px;
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.12),
-    rgba(0,0,0,0)
-  );
-}
-.chart-card:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
-}
 
-.chart-card{
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
-.chip{
-  font-size:0.78rem;
-  padding:5px 10px;
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,0.08);
-  background: rgba(241,245,249,0.85);
-  color:#0f172a;
-}
 /* =========================
-   Status Row (above charts)
+   STATUS ROW (above charts)
    ========================= */
 .status-row{
   display:flex;
@@ -455,9 +430,9 @@ p{line-height:1.55}
   font-size:0.78rem;
   padding:5px 10px;
   border-radius:999px;
-  border:1px solid rgba(0,0,0,0.10);
-  background: rgba(241,245,249,0.85);
-  color:#0f172a;
+  border:1px solid var(--line);
+  background:var(--chip);
+  color:var(--text);
   line-height:1.2;
 }
 
@@ -493,33 +468,43 @@ p{line-height:1.55}
 .status-link{
   margin-left:auto;
   font-size:0.82rem;
-  color: var(--text, #0f172a);
+  color: var(--text);
   text-decoration:none;
   border-bottom:1px dotted rgba(0,0,0,0.35);
   padding:4px 0;
+}
+
+html[data-theme="dark"] .status-link{
+  border-bottom-color: rgba(226,232,240,0.55);
 }
 
 .status-link:hover{
   border-bottom-color: rgba(0,0,0,0.75);
 }
 
+html[data-theme="dark"] .status-link:hover{
+  border-bottom-color: rgba(226,232,240,0.90);
+}
 
 /* =========================
-   Premium vs Spot (below chart)
+   PREMIUM vs SPOT (below chart)
    ========================= */
 .premium-box{
   margin-top:10px;
   padding:10px 12px;
   border-radius:12px;
-  border:1px solid rgba(0,0,0,0.08);
+  border:1px solid var(--line);
   background: rgba(248,250,252,0.92);
   font-size:0.9rem;
-  color:#0f172a;
+  color:var(--text);
 }
 
+html[data-theme="dark"] .premium-box{
+  background: rgba(148,163,184,0.14);
+}
 
 /* =========================
-   Premium Heat Indicator
+   PREMIUM HEAT INDICATOR
    ========================= */
 .heat-row{
   margin-top:8px;
@@ -533,9 +518,9 @@ p{line-height:1.55}
   border-radius:999px;
   padding:6px 12px;
   font-size:0.82rem;
-  border:1px solid rgba(0,0,0,0.10);
-  background:#fff;
-  color:#0f172a;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
 }
 
 /* Heat states */
@@ -563,85 +548,20 @@ p{line-height:1.55}
   color:#7c4a03;
 }
 
-
 /* =========================
-   Mobile polish
+   RESPONSIVE
    ========================= */
+@media (max-width: 980px){
+  .grid-2{ grid-template-columns:1fr; }
+  .nav{ display:none; }
+}
+
+/* Mobile: keep footer visible */
+@media (max-width: 600px){
+  .footer-inner{ flex-direction:row; }
+}
+
+/* Mobile polish for status link */
 @media (max-width: 640px){
-  /* make link not fight for space */
-  .status-link{
-    margin-left:0;
-  }
-}
-/* ---------- Theme tokens (light default) ---------- */
-:root {
-  color-scheme: light dark; /* helps form controls */
-  --bg: #ffffff;
-  --bg-2: #f6f7f9;
-  --text: #111827;
-  --muted: #6b7280;
-  --card: #ffffff;
-  --border: rgba(17, 24, 39, 0.12);
-  --link: #0b5fff;
-  --shadow: 0 10px 30px rgba(0,0,0,.06);
-}
-
-/* ---------- Dark theme overrides ---------- */
-html[data-theme="dark"] {
-  --bg: #0b0f14;
-  --bg-2: #0f172a;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --card: #0f172a;
-  --border: rgba(229, 231, 235, 0.14);
-  --link: #7aa2ff;
-  --shadow: 0 10px 30px rgba(0,0,0,.35);
-}
-
-/* ---------- Apply tokens ---------- */
-body {
-  background: var(--bg);
-  color: var(--text);
-}
-
-a { color: var(--link); }
-
-hr {
-  border: 0;
-  border-top: 1px solid var(--border);
-}
-
-/* If you have “cards/sections” wrap content in, target them here */
-.section,
-.card,
-.widget,
-.embed,
-nav,
-header,
-footer {
-  background: transparent;
-  color: inherit;
-}
-
-/* A nice default “card” helper (optional) */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-}
-
-/* ---------- Toggle button ---------- */
-.theme-toggle {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  border-radius: 999px;
-  padding: 8px 10px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-.theme-toggle:focus {
-  outline: 2px solid var(--link);
-  outline-offset: 2px;
+  .status-link{ margin-left:0; }
 }
