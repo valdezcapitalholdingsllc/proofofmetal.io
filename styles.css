@@ -592,3 +592,31 @@ html[data-theme="dark"] .status-link{
 html[data-theme="dark"] .status-link:hover{
   border-bottom-color: rgba(226,232,240,0.95) !important;
 }
+/* =========================
+   DARK MODE OVERRIDES (force)
+   Paste at VERY BOTTOM so it wins
+   ========================= */
+
+html[data-theme="dark"] .chart-card,
+html[data-theme="dark"] .chart-card-wide{
+  background: var(--card) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+
+/* Make chart titles bright */
+html[data-theme="dark"] .chart-head h3{
+  color: var(--text) !important;
+  opacity: 1 !important;
+}
+
+/* Make "Audit / Docs" bright and readable */
+html[data-theme="dark"] .status-link{
+  color: var(--text) !important;
+  opacity: 1 !important;
+  border-bottom-color: rgba(226,232,240,0.70) !important;
+}
+
+html[data-theme="dark"] .status-link:hover{
+  border-bottom-color: rgba(226,232,240,0.95) !important;
+}
