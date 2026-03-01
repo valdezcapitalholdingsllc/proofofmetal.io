@@ -565,3 +565,30 @@ html[data-theme="dark"] .premium-box{
 @media (max-width: 640px){
   .status-link{ margin-left:0; }
 }
+/* =========================
+   DARK MODE: FORCE FIX FOR DIM TEXT AREA
+   Paste at VERY BOTTOM of styles.css
+   ========================= */
+
+/* Make the chart cards actually go dark (overrides any background:#fff rules) */
+html[data-theme="dark"] .chart-card,
+html[data-theme="dark"] .chart-card-wide{
+  background: var(--card) !important;
+  border-color: var(--line) !important;
+}
+
+/* Ensure the chart title is bright */
+html[data-theme="dark"] .chart-head h3{
+  color: var(--text) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure the Audit/Docs link is bright */
+html[data-theme="dark"] .status-link{
+  color: var(--text) !important;
+  opacity: 1 !important;
+  border-bottom-color: rgba(226,232,240,0.70) !important;
+}
+html[data-theme="dark"] .status-link:hover{
+  border-bottom-color: rgba(226,232,240,0.95) !important;
+}
