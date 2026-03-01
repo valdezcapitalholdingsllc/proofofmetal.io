@@ -12,43 +12,42 @@ document.addEventListener("DOMContentLoaded", () => {
   // TradingView config
   // -------------------------
   const TV_WIDGETS = [
-    { container: "tv_paxg",   symbol: "PAXGUSDT" },
-    { container: "tv_xaut",   symbol: "XAUTUSD" },              // if blank, change to XAUTUSDT or EXCHANGE:XAUTUSD
-    { container: "tv_xauusdt",symbol: "BINANCE:XAUUSDT.P" },
-    { container: "tv_xagusdt",symbol: "BINANCE:XAGUSDT.P" },
-    { container: "tv_kau",    symbol: "KAUUSD" },               // may need exact TradingView listing
-    { container: "tv_cgo",    symbol: "CGOUSD" },               // may need exact TradingView listing
-    { container: "tv_kag",    symbol: "KAGUSD" },               // may need exact TradingView listing
-    { container: "tv_gold",   symbol: "GOLDUSDT.P" }            // placeholder proxy
+    { container: "tv_paxg",    symbol: "PAXGUSDT" },
+    { container: "tv_xaut",    symbol: "XAUTUSD" },               // if blank, try XAUTUSDT or EXCHANGE:XAUTUSD
+    { container: "tv_xauusdt", symbol: "BINANCE:XAUUSDT.P" },
+    { container: "tv_xagusdt", symbol: "BINANCE:XAGUSDT.P" },
+    { container: "tv_kau",     symbol: "KAUUSD" },                // may need exact TradingView listing
+    { container: "tv_cgo",     symbol: "CGOUSD" },                // may need exact TradingView listing
+    { container: "tv_kag",     symbol: "KAGUSD" },                // may need exact TradingView listing
+    { container: "tv_gold",    symbol: "GOLDUSDT.P" }             // placeholder proxy
   ];
-// -------------------------
-// Theme (light/dark)
-// -------------------------
-const THEME_KEY = "pom_theme";
 
-function getPreferredTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === "light" || saved === "dark") return saved;
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
+  // -------------------------
+  // Theme (light/dark)
+  // -------------------------
+  const THEME_KEY = "pom_theme";
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem(THEME_KEY, theme);
+  function getPreferredTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
 
-  // Update icon (optional)
-  const icon = document.getElementById("themeIcon");
-  if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
-}
+    return window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+  }
 
-function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme") || "light";
-  const next = current === "dark" ? "light" : "dark";
-  applyTheme(next);
-  remountAllTradingView(next); // keep charts consistent
-}
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
+
+    const icon = document.getElementById("themeIcon");
+    if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
+  }
+
+  // -------------------------
+  // TradingView loader + mount
+  // -------------------------
   function loadTradingViewScript() {
     return new Promise((resolve, reject) => {
       if (window.TradingView && window.TradingView.widget) return resolve();
@@ -61,38 +60,13 @@ function toggleTheme() {
       document.head.appendChild(s);
     });
   }
-const initialTheme = getPreferredTheme();
-applyTheme(initialTheme);
 
-const toggleBtn = document.getElementById("themeToggle");
-if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
-// =========================
-// THEME (light/dark)
-// =========================
-const THEME_KEY = "pom_theme";
-
-function getPreferredTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === "light" || saved === "dark") return saved;
-
-  return window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-}
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem(THEME_KEY, theme);
-
-  const icon = document.getElementById("themeIcon");
-  if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
-}
-// Mount charts with correct theme on load
-remountAllTradingView(initialTheme);
-  function mountTV(containerId, symbol) {
+  function mountTV(containerId, symbol, theme) {
     const el = document.getElementById(containerId);
     if (!el) return;
+
+    // Important: allow re-mounting when theme changes
+    el.innerHTML = "";
 
     try {
       new window.TradingView.widget({
@@ -100,16 +74,27 @@ remountAllTradingView(initialTheme);
         symbol,
         interval: "30",
         timezone: "Etc/UTC",
-        theme: "light",
+        theme: theme, // ✅ dynamic (light/dark)
         style: "1",
         locale: "en",
         enable_publishing: false,
         hide_side_toolbar: false,
         allow_symbol_change: true,
-        container_id: containerId,
+        container_id: containerId
       });
     } catch (e) {
       console.warn("TradingView mount failed:", containerId, symbol, e);
+    }
+  }
+
+  async function remountAllTradingView(theme) {
+    try {
+      await loadTradingViewScript();
+      for (const w of TV_WIDGETS) {
+        mountTV(w.container, w.symbol, theme);
+      }
+    } catch (e) {
+      console.warn(e);
     }
   }
 
@@ -161,9 +146,6 @@ remountAllTradingView(initialTheme);
   }
 
   async function updatePremiums() {
-    // Spot proxies (Binance)
-    // Gold proxy: XAUUSDT
-    // Silver proxy: XAGUSDT
     let spotGold = null;
     let spotSilver = null;
 
@@ -171,7 +153,6 @@ remountAllTradingView(initialTheme);
       const xau = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=XAUUSDT");
       spotGold = parseFloat(xau.price);
     } catch (e) {
-      // If this fails, we can’t compute gold premiums.
       spotGold = null;
     }
 
@@ -182,7 +163,7 @@ remountAllTradingView(initialTheme);
       spotSilver = null;
     }
 
-    // ----- PAXG vs spot gold -----
+    // PAXG vs spot gold
     try {
       if (!spotGold) throw new Error("No gold spot");
       const paxg = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
@@ -196,10 +177,9 @@ remountAllTradingView(initialTheme);
       setNoData("prem_paxg", "heat_paxg", "PAXG Premium vs Spot: — (source unavailable)");
     }
 
-    // ----- XAUT vs spot gold -----
+    // XAUT vs spot gold
     try {
       if (!spotGold) throw new Error("No gold spot");
-      // Binance may not have XAUT — we try, and fail gracefully.
       const xaut = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=XAUTUSDT");
       const xautPx = parseFloat(xaut.price);
       const prem = ((xautPx - spotGold) / spotGold) * 100;
@@ -211,7 +191,7 @@ remountAllTradingView(initialTheme);
       setNoData("prem_xaut", "heat_xaut", "XAUT Premium vs Spot: — (source unavailable)");
     }
 
-    // ----- KAU vs spot gold -----
+    // KAU vs spot gold
     try {
       if (!spotGold) throw new Error("No gold spot");
       const kau = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=KAUUSDT");
@@ -225,7 +205,7 @@ remountAllTradingView(initialTheme);
       setNoData("prem_kau", "heat_kau", "KAU Premium vs Spot: — (source unavailable)");
     }
 
-    // ----- KAG vs spot silver -----
+    // KAG vs spot silver
     try {
       if (!spotSilver) throw new Error("No silver spot");
       const kag = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=KAGUSDT");
@@ -241,26 +221,26 @@ remountAllTradingView(initialTheme);
   }
 
   // -------------------------
-  // Boot sequence (charts first, premiums second)
+  // Boot sequence
   // -------------------------
-  loadTradingViewScript()
-    .then(() => {
-      TV_WIDGETS.forEach(w => mountTV(w.container, w.symbol));
-    })
+  const initialTheme = getPreferredTheme();
+  applyTheme(initialTheme);
+
+  const toggleBtn = document.getElementById("themeToggle");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", async () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      applyTheme(next);
+      await remountAllTradingView(next);
+    });
+  }
+
+  // Mount charts first, then premiums on interval
+  remountAllTradingView(initialTheme)
     .catch(err => console.error(err))
     .finally(() => {
-      // Premiums should never block charts
       updatePremiums().catch(() => {});
       setInterval(() => updatePremiums().catch(() => {}), 60000);
     });
 });
-async function remountAllTradingView(theme) {
-  try {
-    await loadTradingViewScript();
-    for (const w of TV_WIDGETS) {
-      mountTV(w.container, w.symbol, theme);
-    }
-  } catch (e) {
-    console.warn(e);
-  }
-}
