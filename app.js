@@ -226,3 +226,13 @@ function toggleTheme() {
       setInterval(() => updatePremiums().catch(() => {}), 60000);
     });
 });
+async function remountAllTradingView(theme) {
+  try {
+    await loadTradingViewScript();
+    for (const w of TV_WIDGETS) {
+      mountTV(w.container, w.symbol, theme);
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+}
