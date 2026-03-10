@@ -1,343 +1,229 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // -------------------------
-  // Meta
-  // -------------------------
-  const yearEl = document.getElementById("year");
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+(function () {
+  "use strict";
 
-  const lastUpdatedEl = document.getElementById("lastUpdated");
-  if (lastUpdatedEl) lastUpdatedEl.textContent = `Loaded: ${new Date().toLocaleString()}`;
+  const tvReady = () =>
+    new Promise((resolve, reject) => {
+      let tries = 0;
 
-  // -------------------------
-  // TradingView config
-  // -------------------------
-  const TV_WIDGETS = [
-    { container: "tv_paxg",    symbol: "PAXGUSDT" },
-    { container: "tv_xaut",    symbol: "XAUTUSD" },               // if blank, try XAUTUSDT or EXCHANGE:XAUTUSD
-    { container: "tv_xauusdt", symbol: "BINANCE:XAUUSDT.P" },
-    { container: "tv_xagusdt", symbol: "BINANCE:XAGUSDT.P" },
-    { container: "tv_kau",     symbol: "KAUUSD" },                // may need exact TradingView listing
-    { container: "tv_cgo",     symbol: "CGOUSD" },                // may need exact TradingView listing
-    { container: "tv_kag",     symbol: "KAGUSD" },                // may need exact TradingView listing
-    { container: "tv_gold",    symbol: "GOLDUSDT.P" }             // placeholder proxy
-  ];
+      function check() {
+        if (window.TradingView && typeof window.TradingView.widget === "function") {
+          resolve();
+          return;
+        }
 
-  // -------------------------
-  // Theme (light/dark)
-  // -------------------------
-  const THEME_KEY = "pom_theme";
+        tries += 1;
+        if (tries > 100) {
+          reject(new Error("TradingView library failed to load."));
+          return;
+        }
 
-  function getPreferredTheme() {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === "light" || saved === "dark") return saved;
+        window.setTimeout(check, 100);
+      }
 
-    return window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-  }
-
-  function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-
-    const icon = document.getElementById("themeIcon");
-    if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
-  }
-
-  function getActiveTheme() {
-    return document.documentElement.getAttribute("data-theme") || "light";
-  }
-
-  // -------------------------
-  // TradingView loader + mount
-  // -------------------------
-  function loadTradingViewScript() {
-    return new Promise((resolve, reject) => {
-      if (window.TradingView && window.TradingView.widget) return resolve();
-
-      const s = document.createElement("script");
-      s.src = "https://s3.tradingview.com/tv.js";
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error("Failed to load TradingView script"));
-      document.head.appendChild(s);
+      check();
     });
-  }
 
-  function mountTV(containerId, symbol, theme) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
+  function createWidget(config) {
+    const container = document.getElementById(config.container_id);
+    if (!container) return;
 
-    // Allow re-mounting (theme toggle + modal)
-    el.innerHTML = "";
+    container.innerHTML = "";
 
     try {
-      new window.TradingView.widget({
-        autosize: true,
-        symbol,
-        interval: "30",
-        timezone: "Etc/UTC",
-        theme: theme, // "light" or "dark"
-        style: "1",
-        locale: "en",
-        enable_publishing: false,
-        hide_side_toolbar: false,
-        allow_symbol_change: true,
-        container_id: containerId
+      new TradingView.widget(config);
+    } catch (error) {
+      container.innerHTML = `
+        <div style="
+          min-height:${config.height || 300}px;
+          display:grid;
+          place-items:center;
+          border:1px dashed rgba(255,255,255,0.16);
+          border-radius:16px;
+          color:#a5b0c0;
+          background:rgba(255,255,255,0.02);
+          padding:20px;
+          text-align:center;">
+          Widget failed to load for ${config.symbol || config.container_id}
+        </div>
+      `;
+      console.error(error);
+    }
+  }
+
+  function symbolOverviewConfig(containerId, symbol, height = 320) {
+    return {
+      container_id: containerId,
+      width: "100%",
+      height,
+      symbol,
+      interval: "D",
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "3",
+      locale: "en",
+      toolbar_bg: "#0b0f14",
+      hide_top_toolbar: true,
+      hide_legend: false,
+      withdateranges: true,
+      allow_symbol_change: false,
+      save_image: false,
+      details: true,
+      hotlist: false,
+      calendar: false
+    };
+  }
+
+  function advancedChartConfig(containerId, symbol, height = 520) {
+    return {
+      container_id: containerId,
+      width: "100%",
+      height,
+      symbol,
+      interval: "240",
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      toolbar_bg: "#0b0f14",
+      enable_publishing: false,
+      allow_symbol_change: false,
+      hide_top_toolbar: false,
+      hide_legend: false,
+      withdateranges: true,
+      range: "12M",
+      studies: [],
+      details: false,
+      hotlist: false,
+      calendar: false,
+      support_host: "https://www.tradingview.com"
+    };
+  }
+
+  function tickerTapeConfig() {
+    return {
+      container_id: "tickerTapeWidget",
+      width: "100%",
+      height: 64,
+      symbols: [
+        { proName: "OANDA:XAUUSD", title: "Gold Spot" },
+        { proName: "OANDA:XAGUSD", title: "Silver Spot" },
+        { proName: "CRYPTO:PAXGUSD", title: "PAXG" },
+        { proName: "CRYPTO:XAUTUSD", title: "XAUT" },
+        { proName: "CRYPTO:KAUUSD", title: "KAU" },
+        { proName: "CRYPTO:KAGUSD", title: "KAG" }
+      ],
+      showSymbolLogo: false,
+      isTransparent: true,
+      displayMode: "adaptive",
+      colorTheme: "dark",
+      locale: "en"
+    };
+  }
+
+  function initCoreWidgets() {
+    createWidget(tickerTapeConfig());
+
+    createWidget(symbolOverviewConfig("heroOverviewWidget", "OANDA:XAUUSD", 290));
+
+    createWidget(symbolOverviewConfig("spotGoldWidget", "OANDA:XAUUSD", 220));
+    createWidget(symbolOverviewConfig("spotSilverWidget", "OANDA:XAGUSD", 220));
+    createWidget(symbolOverviewConfig("paxgCardWidget", "CRYPTO:PAXGUSD", 220));
+    createWidget(symbolOverviewConfig("xautCardWidget", "CRYPTO:XAUTUSD", 220));
+    createWidget(symbolOverviewConfig("kauCardWidget", "CRYPTO:KAUUSD", 220));
+    createWidget(symbolOverviewConfig("kagCardWidget", "CRYPTO:KAGUSD", 220));
+
+    createWidget(symbolOverviewConfig("paxgOverviewWidget", "CRYPTO:PAXGUSD", 360));
+    createWidget(symbolOverviewConfig("xautOverviewWidget", "CRYPTO:XAUTUSD", 360));
+    createWidget(symbolOverviewConfig("kauOverviewWidget", "CRYPTO:KAUUSD", 360));
+    createWidget(symbolOverviewConfig("kagOverviewWidget", "CRYPTO:KAGUSD", 360));
+  }
+
+  function benchmarkFor(symbol) {
+    if (symbol === "CRYPTO:KAGUSD") return "OANDA:XAGUSD";
+    return "OANDA:XAUUSD";
+  }
+
+  function shortLabel(symbol) {
+    const map = {
+      "CRYPTO:PAXGUSD": "PAXG",
+      "CRYPTO:XAUTUSD": "XAUT",
+      "CRYPTO:KAUUSD": "KAU",
+      "CRYPTO:KAGUSD": "KAG",
+      "OANDA:XAUUSD": "Gold Spot",
+      "OANDA:XAGUSD": "Silver Spot"
+    };
+
+    return map[symbol] || symbol;
+  }
+
+  function updateCompare(symbol, titleText) {
+    const benchmark = benchmarkFor(symbol);
+
+    const leftTitle = document.getElementById("compareLeftTitle");
+    const rightTitle = document.getElementById("compareRightTitle");
+    const mainTitle = document.getElementById("compareMainTitle");
+
+    if (leftTitle) leftTitle.textContent = shortLabel(symbol);
+    if (rightTitle) rightTitle.textContent = shortLabel(benchmark);
+    if (mainTitle) mainTitle.textContent = titleText;
+
+    createWidget(symbolOverviewConfig("compareLeftWidget", symbol, 320));
+    createWidget(symbolOverviewConfig("compareRightWidget", benchmark, 320));
+    createWidget(advancedChartConfig("compareMainWidget", symbol, 520));
+  }
+
+  function initCompareTabs() {
+    const tabs = document.querySelectorAll(".compare-tab");
+    if (!tabs.length) return;
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((btn) => btn.classList.remove("active"));
+        tab.classList.add("active");
+
+        const symbol = tab.dataset.symbol;
+        const title = tab.dataset.title || shortLabel(symbol);
+        updateCompare(symbol, title);
       });
-    } catch (e) {
-      console.warn("TradingView mount failed:", containerId, symbol, e);
+    });
+
+    const active = document.querySelector(".compare-tab.active");
+    if (active) {
+      updateCompare(active.dataset.symbol, active.dataset.title || shortLabel(active.dataset.symbol));
     }
   }
 
-  async function remountAllTradingView(theme) {
-    await loadTradingViewScript();
-    for (const w of TV_WIDGETS) mountTV(w.container, w.symbol, theme);
-  }
+  function initNav() {
+    const toggle = document.getElementById("navToggle");
+    const nav = document.getElementById("siteNav");
 
-  // -------------------------
-  // Chart click-to-zoom (modal)
-  // -------------------------
-  const modal = document.getElementById("chartModal");
-  const modalClose = document.getElementById("chartModalClose");
-  const modalTitle = document.getElementById("chartModalTitle");
-  const modalTVId = "chartModalTV";
+    if (!toggle || !nav) return;
 
-  let modalOpen = false;
-  let activeModalSymbol = null;
-  let activeModalTitle = null;
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      nav.classList.toggle("open");
+    });
 
-  function openModalForWidget(widget, titleText) {
-    if (!modal) return;
-
-    modalOpen = true;
-    activeModalSymbol = widget.symbol;
-    activeModalTitle = titleText || widget.symbol;
-
-    modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-
-    if (modalTitle) modalTitle.textContent = activeModalTitle;
-
-    // Ensure script is loaded before mounting in modal
-    loadTradingViewScript()
-      .then(() => {
-        mountTV(modalTVId, activeModalSymbol, getActiveTheme());
-      })
-      .catch((e) => console.warn(e));
-  }
-
-  function closeModal() {
-    if (!modal) return;
-
-    modalOpen = false;
-    activeModalSymbol = null;
-    activeModalTitle = null;
-
-    modal.classList.remove("is-open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-
-    // Clear modal container
-    const el = document.getElementById(modalTVId);
-    if (el) el.innerHTML = "";
-
-    // Refresh all charts back in the grid
-    remountAllTradingView(getActiveTheme()).catch(() => {});
-  }
-
-  // Backdrop click (requires data-close="1")
-  modal?.addEventListener("click", (e) => {
-    const t = e.target;
-    if (t && t.dataset && t.dataset.close === "1") closeModal();
-  });
-
-  modalClose?.addEventListener("click", closeModal);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modalOpen) closeModal();
-  });
-
-  function attachZoomHandlers() {
-    for (const w of TV_WIDGETS) {
-      const chartEl = document.getElementById(w.container);
-      if (!chartEl) continue;
-
-      chartEl.style.cursor = "zoom-in";
-      if (chartEl.dataset.zoomBound === "1") continue;
-      chartEl.dataset.zoomBound = "1";
-
-      chartEl.addEventListener("click", () => {
-        const card = chartEl.closest(".chart-card");
-        const title = card?.querySelector(".chart-head h3")?.textContent?.trim();
-        openModalForWidget(w, title);
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
       });
-    }
-  }
-
-  // Helper: remount modal chart when theme changes
-  function remountModalIfOpen() {
-    if (!modalOpen || !activeModalSymbol) return;
-
-    const el = document.getElementById(modalTVId);
-    if (el) el.innerHTML = "";
-
-    loadTradingViewScript()
-      .then(() => {
-        mountTV(modalTVId, activeModalSymbol, getActiveTheme());
-      })
-      .catch((e) => console.warn(e));
-  }
-
-  // -------------------------
-  // Premium/Heat helpers
-  // -------------------------
-  async function fetchJSON(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-
-  function fmtPct(x) {
-    const sign = x >= 0 ? "+" : "";
-    return `${sign}${x.toFixed(2)}%`;
-  }
-
-  function setHeat(elId, pct) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-
-    const DISCOUNT = -0.50;
-    const PREMIUM = 0.50;
-
-    el.classList.remove("discount", "neutral", "premium", "nodata");
-
-    if (pct <= DISCOUNT) {
-      el.classList.add("discount");
-      el.textContent = `HEAT: Discount (${fmtPct(pct)})`;
-    } else if (pct >= PREMIUM) {
-      el.classList.add("premium");
-      el.textContent = `HEAT: Premium (${fmtPct(pct)})`;
-    } else {
-      el.classList.add("neutral");
-      el.textContent = `HEAT: Near Spot (${fmtPct(pct)})`;
-    }
-  }
-
-  function setNoData(premId, heatId, msg) {
-    const premEl = document.getElementById(premId);
-    if (premEl) premEl.textContent = msg;
-
-    const heatEl = document.getElementById(heatId);
-    if (!heatEl) return;
-
-    heatEl.classList.remove("discount", "neutral", "premium", "nodata");
-    heatEl.classList.add("nodata");
-    heatEl.textContent = "HEAT: No data";
-  }
-
-  async function updatePremiums() {
-    let spotGold = null;
-    let spotSilver = null;
-
-    try {
-      const xau = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=XAUUSDT");
-      spotGold = parseFloat(xau.price);
-    } catch {
-      spotGold = null;
-    }
-
-    try {
-      const xag = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=XAGUSDT");
-      spotSilver = parseFloat(xag.price);
-    } catch {
-      spotSilver = null;
-    }
-
-    // PAXG vs spot gold
-    try {
-      if (!spotGold) throw new Error("No gold spot");
-      const paxg = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
-      const paxgPx = parseFloat(paxg.price);
-      const prem = ((paxgPx - spotGold) / spotGold) * 100;
-
-      const el = document.getElementById("prem_paxg");
-      if (el) el.textContent = `PAXG Premium vs Spot: ${fmtPct(prem)}`;
-      setHeat("heat_paxg", prem);
-    } catch {
-      setNoData("prem_paxg", "heat_paxg", "PAXG Premium vs Spot: — (source unavailable)");
-    }
-
-    // XAUT vs spot gold
-    try {
-      if (!spotGold) throw new Error("No gold spot");
-      const xaut = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=XAUTUSDT");
-      const xautPx = parseFloat(xaut.price);
-      const prem = ((xautPx - spotGold) / spotGold) * 100;
-
-      const el = document.getElementById("prem_xaut");
-      if (el) el.textContent = `XAUT Premium vs Spot: ${fmtPct(prem)}`;
-      setHeat("heat_xaut", prem);
-    } catch {
-      setNoData("prem_xaut", "heat_xaut", "XAUT Premium vs Spot: — (source unavailable)");
-    }
-
-    // KAU vs spot gold
-    try {
-      if (!spotGold) throw new Error("No gold spot");
-      const kau = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=KAUUSDT");
-      const kauPx = parseFloat(kau.price);
-      const prem = ((kauPx - spotGold) / spotGold) * 100;
-
-      const el = document.getElementById("prem_kau");
-      if (el) el.textContent = `KAU Premium vs Spot: ${fmtPct(prem)}`;
-      setHeat("heat_kau", prem);
-    } catch {
-      setNoData("prem_kau", "heat_kau", "KAU Premium vs Spot: — (source unavailable)");
-    }
-
-    // KAG vs spot silver
-    try {
-      if (!spotSilver) throw new Error("No silver spot");
-      const kag = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbol=KAGUSDT");
-      const kagPx = parseFloat(kag.price);
-      const prem = ((kagPx - spotSilver) / spotSilver) * 100;
-
-      const el = document.getElementById("prem_kag");
-      if (el) el.textContent = `KAG Premium vs Spot: ${fmtPct(prem)}`;
-      setHeat("heat_kag", prem);
-    } catch {
-      setNoData("prem_kag", "heat_kag", "KAG Premium vs Spot: — (source unavailable)");
-    }
-  }
-
-  // -------------------------
-  // Boot sequence
-  // -------------------------
-  const initialTheme = getPreferredTheme();
-  applyTheme(initialTheme);
-
-  const toggleBtn = document.getElementById("themeToggle");
-  if (toggleBtn) {
-    toggleBtn.addEventListener("click", async () => {
-      const next = getActiveTheme() === "dark" ? "light" : "dark";
-      applyTheme(next);
-
-      // Remount main charts
-      await remountAllTradingView(next);
-
-      // Remount modal chart (if open) so it matches theme
-      remountModalIfOpen();
     });
   }
 
-  remountAllTradingView(initialTheme)
-    .then(() => attachZoomHandlers())
-    .catch(err => console.error(err))
-    .finally(() => {
-      updatePremiums().catch(() => {});
-      setInterval(() => updatePremiums().catch(() => {}), 60000);
-    });
-});
+  async function init() {
+    initNav();
+
+    try {
+      await tvReady();
+      initCoreWidgets();
+      initCompareTabs();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
