@@ -2,651 +2,476 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Proof Of Metal — Live Charts</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Proof Of Metal — Tokenized Precious Metals Dashboard</title>
+  <meta
+    name="description"
+    content="Real-time market intelligence for tokenized precious metals and digital assets tied to physical bullion."
+  />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <!-- TOP TICKER -->
+  <section class="ticker-shell">
+    <div id="tickerTapeWidget" class="tv-widget-block"></div>
+  </section>
 
-  <!-- Header image (branding only) -->
-  <header class="site-header" style="background-image:url('./assets/proof-of-metal-header.png');">
-    <div class="header-overlay"></div>
-
-    <div class="header-inner">
-      <a class="brand" href="./index.html" aria-label="Proof Of Metal Home">
-        <img class="brand-logo" src="./assets/proof-of-metal-logo.png" alt="Proof Of Metal logo" />
+  <!-- HEADER / NAV -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#top" aria-label="Proof Of Metal Home">
+        <img
+          class="brand-logo"
+          src="./assets/proof-of-metal-logo.png"
+          alt="Proof Of Metal logo"
+        />
         <div class="brand-text">
           <div class="brand-title">PROOF OF METAL</div>
-          <div class="brand-tagline">On-chain transparency for precious metals</div>
+          <div class="brand-tag">Tokenized Precious Metals Dashboard</div>
         </div>
       </a>
+
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+        ☰
+      </button>
+
+      <nav class="site-nav" id="siteNav">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#tokens">Tokens</a>
+        <a href="#compare">Compare</a>
+        <a href="#proof">Proof Scores</a>
+        <a href="#research">Docs</a>
+        <a href="#thesis">Thesis</a>
+      </nav>
     </div>
   </header>
 
-  <!-- Toolbar Navigation (below header) -->
-  <div class="toolbar">
-    <div class="toolbar-inner">
-      <a class="toolbar-link" href="#charts">Live Charts</a>
-      <a class="toolbar-link" href="#cmc">Market Widgets</a>
-      <a class="toolbar-link" href="#explain">Explanations</a>
-      <a class="toolbar-link" href="#considerations">Considerations</a>
-
-      <button id="themeToggle" class="toolbar-toggle" type="button" aria-label="Toggle theme">
-        <span id="themeLabel">Dark Mode</span>
-      </button>
-    </div>
-  </div>
-
-  <main class="wrap">
-
-    <!-- About -->
-    <section id="about" class="card">
-      <h1>Live charts for metal-linked digital assets.</h1>
-      <p class="muted">
-        Track tokenized metals and metal-linked markets with minimal narrative.
-        The goal is simple: make the space feel less like “magic internet money”
-        and more tied to real-world value.
-      </p>
-    </section>
-
-    <!-- =========================
-         LIVE CHARTS (TradingView)
-         ========================= -->
-    <section id="charts" class="card">
-      <div class="section-head">
-        <h2>Live Charts</h2>
-        <div class="muted" id="lastUpdated">—</div>
-      </div>
-
-      <p class="tiny muted">
-        These are embedded from TradingView for live market viewing.
-      </p>
-
-      <div class="grid-2">
-
-        <!-- PAXG -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>PAXG (PAXGUSDT)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Yes (claimed)</span>
-            <span class="status-pill redeem">Redeemable: Yes (verify)</span>
-            <span class="status-pill net">Network: ERC-20</span>
-            <span class="status-pill min">Min Redemption: Varies</span>
-            <a class="status-link" href="https://paxos.com/paxgold/" target="_blank" rel="noopener">Audit / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_paxg"></div>
-
-          <div class="premium-box" id="prem_paxg">Premium vs Spot: —</div>
-
-          <div class="heat-row">
-            <span class="heat-badge neutral" id="heat_paxg">HEAT: —</span>
-          </div>
-        </article>
-
-        <!-- XAUT -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>XAUT (Tether Gold)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Yes (claimed)</span>
-            <span class="status-pill redeem">Redeemable: Yes (verify)</span>
-            <span class="status-pill net">Network: ERC-20</span>
-            <span class="status-pill min">Min Redemption: Varies</span>
-            <a class="status-link" href="https://tether.to/en/gold/" target="_blank" rel="noopener">Audit / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_xaut"></div>
-
-          <div class="premium-box" id="prem_xaut">Premium vs Spot: —</div>
-
-          <div class="heat-row">
-            <span class="heat-badge neutral" id="heat_xaut">HEAT: —</span>
-          </div>
-        </article>
-
-        <!-- XAUUSDT -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>XAUUSDT</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Spot proxy</span>
-            <span class="status-pill redeem">Redeemable: N/A</span>
-            <span class="status-pill net">Venue: Binance Perp</span>
-            <span class="status-pill min">Min Redemption: N/A</span>
-            <a class="status-link" href="https://www.tradingview.com/" target="_blank" rel="noopener">Source</a>
-          </div>
-
-          <div class="tv-chart" id="tv_xauusdt"></div>
-        </article>
-
-        <!-- XAGUSDT -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>XAGUSDT</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Spot proxy</span>
-            <span class="status-pill redeem">Redeemable: N/A</span>
-            <span class="status-pill net">Venue: Binance Perp</span>
-            <span class="status-pill min">Min Redemption: N/A</span>
-            <a class="status-link" href="https://www.tradingview.com/" target="_blank" rel="noopener">Source</a>
-          </div>
-
-          <div class="tv-chart" id="tv_xagusdt"></div>
-        </article>
-
-        <!-- KAU -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>KAU (Kinesis Gold)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Claimed</span>
-            <span class="status-pill redeem">Redeemable: Verify</span>
-            <span class="status-pill net">Network: Kinesis</span>
-            <span class="status-pill min">Min Redemption: Verify</span>
-            <a class="status-link" href="https://kinesis.money/" target="_blank" rel="noopener">Audit / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_kau"></div>
-
-          <div class="premium-box" id="prem_kau">KAU Premium vs Spot: —</div>
-
-          <div class="heat-row">
-            <span class="heat-badge neutral" id="heat_kau">HEAT: —</span>
-          </div>
-        </article>
-
-        <!-- CGO -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>CGO (Comtech Gold)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Claimed</span>
-            <span class="status-pill redeem">Redeemable: Verify</span>
-            <span class="status-pill net">Network: —</span>
-            <span class="status-pill min">Min Redemption: Verify</span>
-            <a class="status-link" href="https://comtechgold.com/" target="_blank" rel="noopener">Audit / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_cgo"></div>
-        </article>
-
-        <!-- KAG -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>KAG (Kinesis Silver)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Claimed</span>
-            <span class="status-pill redeem">Redeemable: Verify</span>
-            <span class="status-pill net">Network: Kinesis</span>
-            <span class="status-pill min">Min Redemption: ~200 oz (verify)</span>
-            <a class="status-link" href="https://kinesis.money/" target="_blank" rel="noopener">Audit / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_kag"></div>
-
-          <div class="premium-box" id="prem_kag">KAG Premium vs Spot: —</div>
-
-          <div class="heat-row">
-            <span class="heat-badge neutral" id="heat_kag">HEAT: —</span>
-          </div>
-        </article>
-
-        <!-- $GOLD -->
-        <article class="chart-card">
-          <div class="chart-head">
-            <h3>$GOLD (Tokenized Gold)</h3>
-            <span class="chip">TradingView</span>
-          </div>
-
-          <div class="status-row">
-            <span class="status-pill backed">Backed: Unknown</span>
-            <span class="status-pill redeem">Redeemable: Unknown</span>
-            <span class="status-pill net">Network: Solana / ERC-20</span>
-            <span class="status-pill min">Min Redemption: Unknown</span>
-            <a class="status-link" href="#" target="_blank" rel="noopener">Contract / Docs</a>
-          </div>
-
-          <div class="tv-chart" id="tv_gold"></div>
-
-          <p class="tiny muted">
-            “$GOLD” refers to a specific token deployed on Solana and ERC-20 rails.
-            Verify contract addresses and backing claims before relying on price data.
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">LIVE MARKET INTELLIGENCE</p>
+          <h1>Digital assets tied to physical precious metals.</h1>
+          <p class="hero-text">
+            Track tokenized gold and silver against spot benchmarks, compare issuers,
+            and evaluate transparency, redeemability, and custody clarity in one place.
           </p>
-        </article>
 
-      </div><!-- /.grid-2 -->
-    </section><!-- /#charts -->
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#dashboard">Open Dashboard</a>
+            <a class="btn btn-secondary" href="#proof">View Proof Scores</a>
+          </div>
 
-    <!-- =========================
-         WHY PROOF OF METAL EXISTS (after charts)
-         ========================= -->
-    <section id="why" class="card">
-      <div class="section-head">
-        <h2>🪙 Why Proof Of Metal Exists</h2>
-        <div class="muted">A production of Valdez Capital Holdings, LLC.</div>
-      </div>
+          <div class="hero-stat-row">
+            <div class="hero-stat">
+              <span class="hero-stat-label">Focus</span>
+              <strong>Tokenized Bullion</strong>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">Coverage</span>
+              <strong>Gold + Silver</strong>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">Framework</span>
+              <strong>Price + Trust</strong>
+            </div>
+          </div>
+        </div>
 
-      <p class="muted">Digital markets move quickly. Transparency does not always keep pace.</p>
-      <p class="muted">
-        Proof Of Metal is built to provide clarity, observable data, and real-world grounding
-        for assets linked to physical precious metals.
-      </p>
+        <div class="hero-panel">
+          <div class="panel-card spotlight-card">
+            <div class="panel-top">
+              <span class="panel-label">Market Snapshot</span>
+              <span class="live-pill">LIVE</span>
+            </div>
 
-      <div class="why-grid">
-        <article class="why-card">
-          <h3>1) Market Structure Requires Discipline</h3>
-          <p class="muted">
-            Fragmented liquidity, uneven transparency, and narrative cycles complicate price discovery.
-            Depth and quality vary by venue.
-          </p>
-          <p class="muted">
-            Proof Of Metal prioritizes verifiable market data over commentary or promotion.
-          </p>
-        </article>
+            <h2>Tokenized Metals at a Glance</h2>
 
-        <article class="why-card">
-          <h3>2) 24/7, Token-First Trading</h3>
-          <p class="muted">
-            Trading increasingly runs on continuous digital rails across centralized and decentralized venues.
-          </p>
-          <p class="muted">
-            Proof Of Metal tracks these markets using transparent sources and standardized presentation —
-            without narrative overlays or incentive bias.
-          </p>
-        </article>
+            <div class="mini-grid">
+              <div class="mini-box">
+                <span>Benchmark</span>
+                <strong>XAU / XAG Spot</strong>
+              </div>
+              <div class="mini-box">
+                <span>Best Known Gold Tokens</span>
+                <strong>PAXG / XAUT</strong>
+              </div>
+              <div class="mini-box">
+                <span>Utility Layer</span>
+                <strong>KAU / KAG</strong>
+              </div>
+              <div class="mini-box">
+                <span>What To Watch</span>
+                <strong>Spread + Redemption</strong>
+              </div>
+            </div>
 
-        <article class="why-card">
-          <h3>3) Linking Digital Claims to Physical Assets</h3>
-          <p class="muted">
-            Real-world assets are being tokenized at increasing scale. The long-term objective is straightforward:
-          </p>
-          <ul class="why-list">
-            <li>Track digital claims tied to physical precious metals</li>
-            <li>Evaluate holdings as inventory, not just price movement</li>
-            <li>Support long-term capital preservation and generational planning</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="why-principle">
-        <div class="why-principle__label">Core Principle</div>
-        <p class="muted">
-          Market credibility increases when digital instruments are anchored to assets that can be possessed,
-          stored, and independently verified.
-        </p>
-        <p class="muted">
-          Proof Of Metal exists to narrow the distance between digital markets and physical reality.
-        </p>
+            <div class="hero-chart-wrap">
+              <div id="heroOverviewWidget" class="tv-widget-block tv-widget-medium"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- =========================
-         COINMARKETCAP WIDGETS
-         ========================= -->
-    <section id="cmc" class="card">
-      <div class="section-head">
-        <h2>Market Widgets</h2>
-        <div class="muted">CoinMarketCap</div>
+    <!-- DASHBOARD CARDS -->
+    <section id="dashboard" class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">DASHBOARD</p>
+          <h2>Core market dashboard</h2>
+          <p>
+            Underlying spot comes first. Tokenized versions come second. That keeps the site
+            anchored to physical metal instead of drifting into generic crypto presentation.
+          </p>
+        </div>
+
+        <div class="market-card-grid">
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">XAUUSD</span>
+              <span class="badge neutral">Spot Gold</span>
+            </div>
+            <h3>Gold Benchmark</h3>
+            <p class="card-copy">Reference price for gold-backed tokens and premium tracking.</p>
+            <div id="spotGoldWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">XAGUSD</span>
+              <span class="badge neutral">Spot Silver</span>
+            </div>
+            <h3>Silver Benchmark</h3>
+            <p class="card-copy">Reference price for silver-linked tokens and spread analysis.</p>
+            <div id="spotSilverWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">PAXGUSD</span>
+              <span class="badge good">Gold Token</span>
+            </div>
+            <h3>PAX Gold</h3>
+            <p class="card-copy">Widely used tokenized gold reference for on-chain bullion exposure.</p>
+            <div id="paxgCardWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">XAUTUSD</span>
+              <span class="badge good">Gold Token</span>
+            </div>
+            <h3>Tether Gold</h3>
+            <p class="card-copy">Gold-backed token to compare against spot and competitor products.</p>
+            <div id="xautCardWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">KAUUSD</span>
+              <span class="badge warn">Gold Utility</span>
+            </div>
+            <h3>Kinesis Gold</h3>
+            <p class="card-copy">Gold-linked digital unit with a utility and payment-oriented angle.</p>
+            <div id="kauCardWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+
+          <article class="market-card">
+            <div class="market-card-top">
+              <span class="ticker">KAGUSD</span>
+              <span class="badge warn">Silver Utility</span>
+            </div>
+            <h3>Kinesis Silver</h3>
+            <p class="card-copy">Silver-linked unit for tracking utility-layer exposure to silver.</p>
+            <div id="kagCardWidget" class="tv-widget-block tv-widget-card"></div>
+          </article>
+        </div>
       </div>
+    </section>
 
-      <p class="tiny muted">
-        These widgets are embedded from CoinMarketCap for consistent display. Use “Open” for the full chart page.
-      </p>
+    <!-- TOKENS -->
+    <section id="tokens" class="section section-alt">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">TOKENS</p>
+          <h2>Track price, backing, and utility</h2>
+          <p>
+            Each module pairs your trust framework with a live market widget so the page feels like a dashboard, not a static article.
+          </p>
+        </div>
 
-      <div class="grid-2">
-        <!-- AU79 -->
-        <article class="chart-card chart-card-wide">
-          <div class="chart-head">
-            <h3>AU79</h3>
-            <span class="chip">CoinMarketCap</span>
-          </div>
-
-          <div class="cmc-wrap">
-            <div
-              class="coinmarketcap-currency-widget"
-              data-currencyid="37580"
-              data-base="USD"
-              data-secondary=""
-              data-ticker="true"
-              data-rank="true"
-              data-marketcap="true"
-              data-volume="true"
-              data-statsticker="true"
-              data-stats="USD"></div>
-
-            <div class="cmc-actions">
-              <a class="btn" href="https://coinmarketcap.com/currencies/au79/" target="_blank" rel="noopener">
-                Open AU79 Live Chart →
-              </a>
-              <span class="tiny muted">
-                CoinMarketCap’s full chart page can’t be embedded, so we embed the official widget + link out.
-              </span>
+        <div class="token-grid">
+          <article class="token-panel">
+            <div class="token-header">
+              <div>
+                <p class="token-type">Gold-backed token</p>
+                <h3>PAXG</h3>
+              </div>
+              <span class="proof-score high">88</span>
             </div>
-          </div>
-        </article>
 
-        <!-- VNXAU -->
-        <article class="chart-card chart-card-wide">
-          <div class="chart-head">
-            <h3>VNXAU (VNX Gold)</h3>
-            <span class="chip">CoinMarketCap</span>
-          </div>
-
-          <div class="cmc-wrap">
-            <div
-              class="coinmarketcap-currency-widget"
-              data-currencyid="22492"
-              data-base="USD"
-              data-secondary=""
-              data-ticker="true"
-              data-marketcap="true"
-              data-volume="true"
-              data-statsticker="true"
-              data-stats="USD"></div>
-
-            <div class="cmc-actions">
-              <a class="btn" href="https://coinmarketcap.com/currencies/vnx-gold/" target="_blank" rel="noopener">
-                Open VNXAU Live Chart →
-              </a>
+            <div class="token-metrics">
+              <div><span>Backing</span><strong>Allocated Gold</strong></div>
+              <div><span>Redeemability</span><strong>Available</strong></div>
+              <div><span>Custody Clarity</span><strong>Strong</strong></div>
+              <div><span>Premium vs Spot</span><strong>Track Live</strong></div>
             </div>
-          </div>
-        </article>
 
-        <!-- PMGT -->
-        <article class="chart-card chart-card-wide">
-          <div class="chart-head">
-            <h3>PMGT (Perth Mint Gold Token)</h3>
-            <span class="chip">CoinMarketCap</span>
-          </div>
+            <div id="paxgOverviewWidget" class="tv-widget-block tv-widget-tall"></div>
+          </article>
 
-          <div class="cmc-wrap">
-            <div
-              class="coinmarketcap-currency-widget"
-              data-currencyid="5203"
-              data-base="USD"
-              data-secondary=""
-              data-ticker="true"
-              data-marketcap="true"
-              data-volume="true"
-              data-statsticker="true"
-              data-stats="USD"></div>
-
-            <div class="cmc-actions">
-              <a class="btn" href="https://coinmarketcap.com/currencies/perth-mint-gold-token/" target="_blank" rel="noopener">
-                Open PMGT Live Chart →
-              </a>
+          <article class="token-panel">
+            <div class="token-header">
+              <div>
+                <p class="token-type">Gold-backed token</p>
+                <h3>XAUT</h3>
+              </div>
+              <span class="proof-score high">82</span>
             </div>
-          </div>
-        </article>
 
-        <!-- XNK -->
-        <article class="chart-card chart-card-wide">
-          <div class="chart-head">
-            <h3>XNK (Kinka)</h3>
-            <span class="chip">CoinMarketCap</span>
-          </div>
-
-          <div class="cmc-wrap">
-            <div
-              class="coinmarketcap-currency-widget"
-              data-currencyid="30272"
-              data-base="USD"
-              data-secondary=""
-              data-ticker="true"
-              data-marketcap="true"
-              data-volume="true"
-              data-statsticker="true"
-              data-stats="USD"></div>
-
-            <div class="cmc-actions">
-              <a class="btn" href="https://coinmarketcap.com/currencies/kinka/" target="_blank" rel="noopener">
-                Open XNK Live Chart →
-              </a>
+            <div class="token-metrics">
+              <div><span>Backing</span><strong>Physical Gold</strong></div>
+              <div><span>Redeemability</span><strong>Restricted</strong></div>
+              <div><span>Custody Clarity</span><strong>Moderate</strong></div>
+              <div><span>Premium vs Spot</span><strong>Track Live</strong></div>
             </div>
-          </div>
-        </article>
 
-        <!-- Silver (RWA) -->
-        <article class="chart-card chart-card-wide">
-          <div class="chart-head">
-            <h3>Silver (Physical / RWA)</h3>
-            <span class="chip">CoinMarketCap</span>
-          </div>
+            <div id="xautOverviewWidget" class="tv-widget-block tv-widget-tall"></div>
+          </article>
 
-          <div class="cmc-wrap">
-            <div
-              class="coinmarketcap-realasset-widget"
-              data-realassetid="14"
-              data-base="USD"
-              data-secondary=""
-              data-ticker="true"
-              data-marketcap="true"
-              data-volume="true"
-              data-chart="true"
-              data-statsticker="true"></div>
-
-            <div class="cmc-actions">
-              <a class="btn" href="https://coinmarketcap.com/real-world-assets/silver/" target="_blank" rel="noopener">
-                Open Silver Live Chart →
-              </a>
-              <span class="tiny muted">
-                CoinMarketCap’s full chart page can’t be embedded, so we embed the official widget + link out.
-              </span>
+          <article class="token-panel">
+            <div class="token-header">
+              <div>
+                <p class="token-type">Gold utility token</p>
+                <h3>KAU</h3>
+              </div>
+              <span class="proof-score med">78</span>
             </div>
-          </div>
-        </article>
 
-      </div><!-- /.grid-2 -->
-    </section><!-- /#cmc -->
+            <div class="token-metrics">
+              <div><span>Backing</span><strong>Metal-linked</strong></div>
+              <div><span>Redeemability</span><strong>Available</strong></div>
+              <div><span>Custody Clarity</span><strong>Moderate</strong></div>
+              <div><span>Premium vs Spot</span><strong>Track Live</strong></div>
+            </div>
 
-    <!-- =========================
-         EXPLANATIONS
-         ========================= -->
-    <section id="explain" class="card">
-      <div class="section-head">
-        <h2>Asset Explanations</h2>
-        <div class="muted">Plain-language summaries</div>
+            <div id="kauOverviewWidget" class="tv-widget-block tv-widget-tall"></div>
+          </article>
+
+          <article class="token-panel">
+            <div class="token-header">
+              <div>
+                <p class="token-type">Silver utility token</p>
+                <h3>KAG</h3>
+              </div>
+              <span class="proof-score med">79</span>
+            </div>
+
+            <div class="token-metrics">
+              <div><span>Backing</span><strong>Metal-linked</strong></div>
+              <div><span>Redeemability</span><strong>Available</strong></div>
+              <div><span>Custody Clarity</span><strong>Moderate</strong></div>
+              <div><span>Premium vs Spot</span><strong>Track Live</strong></div>
+            </div>
+
+            <div id="kagOverviewWidget" class="tv-widget-block tv-widget-tall"></div>
+          </article>
+        </div>
       </div>
+    </section>
 
-      <p class="tiny muted">
-        The notes below summarize how each project describes its backing and redemption model.
-        Always verify details directly with issuer documentation and independent audits.
-      </p>
-
-      <div class="explain-grid">
-        <article class="explain-card">
-          <h3>PAX Gold (PAXG)</h3>
-          <p class="muted">
-            Paxos issues PAXG as a tokenized gold product. Each token is marketed as representing
-            one fine troy ounce of London Good Delivery gold held in professional vault custody.
+    <!-- COMPARE -->
+    <section id="compare" class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">COMPARE</p>
+          <h2>Token vs spot comparison</h2>
+          <p>
+            This section is built as a visual compare lane: token on the left, benchmark on the right, plus a switchable main chart below.
           </p>
-        </article>
+        </div>
 
-        <article class="explain-card">
-          <h3>Tether Gold (XAUT)</h3>
-          <p class="muted">
-            Tether positions XAUT as tokenized ownership of physical gold. Each token is marketed as
-            one troy ounce of gold, with specific bar ownership tracked via on-chain records.
-          </p>
-        </article>
+        <div class="compare-switcher">
+          <button class="compare-tab active" data-symbol="CRYPTO:PAXGUSD" data-title="PAXG vs Gold Spot">
+            PAXG vs XAU
+          </button>
+          <button class="compare-tab" data-symbol="CRYPTO:XAUTUSD" data-title="XAUT vs Gold Spot">
+            XAUT vs XAU
+          </button>
+          <button class="compare-tab" data-symbol="CRYPTO:KAUUSD" data-title="KAU vs Gold Spot">
+            KAU vs XAU
+          </button>
+          <button class="compare-tab" data-symbol="CRYPTO:KAGUSD" data-title="KAG vs Silver Spot">
+            KAG vs XAG
+          </button>
+        </div>
 
-        <article class="explain-card">
-          <h3>Kinesis Gold (KAU)</h3>
-          <p class="muted">
-            Kinesis presents KAU as fully allocated gold with redemption pathways. The project emphasizes
-            allocation, storage custody, and the ability to convert holdings to physical gold (subject to terms).
-          </p>
-        </article>
+        <div class="compare-grid compare-top-grid">
+          <article class="compare-card">
+            <h3 id="compareLeftTitle">Selected Token</h3>
+            <div id="compareLeftWidget" class="tv-widget-block tv-widget-compare"></div>
+          </article>
 
-        <article class="explain-card">
-          <h3>Comtech Gold (CGO)</h3>
-          <p class="muted">
-            Comtech markets CGO as a gold-backed token with a focus on accessibility and liquidity.
-            Review reserve disclosures and redemption requirements to understand how backing is maintained.
-          </p>
-        </article>
+          <article class="compare-card">
+            <h3 id="compareRightTitle">Spot Benchmark</h3>
+            <div id="compareRightWidget" class="tv-widget-block tv-widget-compare"></div>
+          </article>
+        </div>
 
-        <article class="explain-card">
-          <h3>Kinesis Silver (KAG)</h3>
-          <p class="muted">
-            Kinesis positions KAG as tokenized, allocated silver. The platform also advertises yield mechanics;
-            confirm eligibility, redemption minimums, and fee structure before relying on any yield expectations.
-          </p>
-        </article>
-
-        <article class="explain-card">
-          <h3>$GOLD (Solana / ERC-20)</h3>
-          <p class="muted">
-            “$GOLD” refers to a tokenized gold project deployed across Solana and ERC-20 ecosystems.
-            Backing models and redemption mechanics vary by issuer, so contract verification is essential.
-          </p>
-        </article>
-
-        <article class="explain-card">
-          <h3>VNX Gold (VNXAU)</h3>
-          <p class="muted">
-            VNX describes VNXAU as a Liechtenstein-issued token backed by LBMA-certified gold,
-            commonly presented as 1 gram per token. Verify custody arrangements and audit cadence.
-          </p>
-        </article>
-
-        <article class="explain-card">
-          <h3>Perth Mint Gold Token (PMGT)</h3>
-          <p class="muted">
-            PMGT is marketed as a regulated gold token associated with the Perth Mint ecosystem and
-            government-linked oversight. Confirm current issuance status, storage terms, and redemption processes.
-          </p>
-        </article>
-
-        <article class="explain-card">
-          <h3>AurusGOLD (AWG)</h3>
-          <p class="muted">
-            Aurus markets AWG as a 1-gram gold token backed by high-purity, LBMA-certified bullion.
-            Review reserve reports and redemption conditions to validate backing claims.
-          </p>
-        </article>
-
-        <article class="explain-card">
-          <h3>Kinka (XNK)</h3>
-          <p class="muted">
-            XNK is described as a gold-linked token with a 1-gram framing. Confirm the issuer, custody model,
-            and whether redemption is available in practice (not just in marketing).
-          </p>
+        <article class="compare-card compare-main-card">
+          <div class="compare-main-head">
+            <h3 id="compareMainTitle">PAXG vs Gold Spot</h3>
+            <p>
+              Use this chart for the selected token, then read spread, redemption, and trust notes in your Proof Score table below.
+            </p>
+          </div>
+          <div id="compareMainWidget" class="tv-widget-block tv-widget-main-chart"></div>
         </article>
       </div>
-    </section><!-- /#explain -->
+    </section>
 
-    <!-- =========================
-         KEY CONSIDERATIONS
-         ========================= -->
-    <section id="considerations" class="card">
-      <div class="section-head">
-        <h2>Key Considerations</h2>
-        <div class="muted">Before you trust a “metal-backed” token</div>
+    <!-- PROOF SCORES -->
+    <section id="proof" class="section section-alt">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">PROOF SCORES</p>
+          <h2>Transparency, custody, and redemption at a glance</h2>
+          <p>
+            This is the part MetalCharts does not own. Your edge is evaluating the quality of the digital claim, not just the chart.
+          </p>
+        </div>
+
+        <div class="table-shell">
+          <table class="proof-table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Backing</th>
+                <th>Redemption</th>
+                <th>Custody</th>
+                <th>Premium vs Spot</th>
+                <th>Proof Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PAXG</td>
+                <td>Strong</td>
+                <td>Available</td>
+                <td>Clear</td>
+                <td>Monitor Live</td>
+                <td><span class="table-score high">88</span></td>
+              </tr>
+              <tr>
+                <td>XAUT</td>
+                <td>Strong</td>
+                <td>Restricted</td>
+                <td>Moderate</td>
+                <td>Monitor Live</td>
+                <td><span class="table-score high">82</span></td>
+              </tr>
+              <tr>
+                <td>KAU</td>
+                <td>Moderate</td>
+                <td>Available</td>
+                <td>Moderate</td>
+                <td>Monitor Live</td>
+                <td><span class="table-score med">78</span></td>
+              </tr>
+              <tr>
+                <td>KAG</td>
+                <td>Moderate</td>
+                <td>Available</td>
+                <td>Moderate</td>
+                <td>Monitor Live</td>
+                <td><span class="table-score med">79</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </section>
 
-      <div class="consider-grid">
-        <article class="consider-card">
-          <h3>Redeemability</h3>
-          <p class="muted">
-            Most reputable tokens allow for redemption, though minimum amounts may apply (e.g., 200 ounces for KAG).
+    <!-- DOCS -->
+    <section id="research" class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">RESEARCH</p>
+          <h2>Issuer documents and reserve research</h2>
+          <p>
+            Keep your educational and due-diligence material here so the homepage stays dashboard-first.
           </p>
-        </article>
+        </div>
 
-        <article class="consider-card">
-          <h3>Transparency</h3>
-          <p class="muted">
-            Look for projects that provide regular, independent third-party audits of their physical reserves.
-          </p>
-        </article>
+        <div class="docs-grid">
+          <a class="doc-card" href="#" target="_blank" rel="noopener noreferrer">
+            <span class="doc-label">Issuer Docs</span>
+            <h3>PAXG Documentation</h3>
+            <p>Reserve structure, legal framework, and redemption details.</p>
+          </a>
 
-        <article class="consider-card">
-          <h3>Storage & Regulation</h3>
-          <p class="muted">
-            Gold is usually stored in secure, insured vaults (e.g., in Switzerland or London) and sometimes regulated by entities like the NYDFS.
-          </p>
-        </article>
+          <a class="doc-card" href="#" target="_blank" rel="noopener noreferrer">
+            <span class="doc-label">Issuer Docs</span>
+            <h3>XAUT Documentation</h3>
+            <p>Custody framework, token terms, and underlying gold structure.</p>
+          </a>
 
-        <article class="consider-card">
-          <h3>Risks</h3>
-          <p class="muted">
-            Investors face risks related to vault security, the bankruptcy of the issuer, or fraudulent projects that do not hold adequate reserves.
-          </p>
-        </article>
+          <a class="doc-card" href="#" target="_blank" rel="noopener noreferrer">
+            <span class="doc-label">Issuer Docs</span>
+            <h3>Kinesis Documentation</h3>
+            <p>System design, utility mechanics, and metal-linkage details.</p>
+          </a>
+
+          <a class="doc-card" href="#" target="_blank" rel="noopener noreferrer">
+            <span class="doc-label">Methodology</span>
+            <h3>Proof Score Framework</h3>
+            <p>Show how your scoring model evaluates trust, custody, and redemption.</p>
+          </a>
+        </div>
       </div>
-    </section><!-- /#considerations -->
+    </section>
 
+    <!-- THESIS -->
+    <section id="thesis" class="section section-alt">
+      <div class="container narrow">
+        <div class="section-head center">
+          <p class="section-kicker">THESIS</p>
+          <h2>Why Proof Of Metal exists</h2>
+        </div>
+
+        <div class="thesis-card">
+          <p>
+            Proof Of Metal exists to track the intersection of physical bullion and digital financial infrastructure.
+            Not every tokenized metal product carries the same transparency, redemption rights, custody clarity, or market behavior.
+          </p>
+          <p>
+            This dashboard helps users compare tokenized metals against spot benchmarks while also judging whether those digital claims appear robust, usable, and credible.
+          </p>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="wrap footer-inner">
-      <div class="footer-left">
-        <span class="muted">© <span id="year"></span> Proof Of Metal</span>
-        <span class="muted">Not financial advice.</span>
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <div>
+        <div class="footer-brand">PROOF OF METAL</div>
+        <p class="footer-copy">Real-time intelligence for digital assets tied to physical metals.</p>
       </div>
 
-      <div class="footer-right">
-        <a
-          href="https://www.reddit.com/user/ValdezCapitaHoldings/"
-          target="_blank"
-          rel="noopener"
-          class="footer-icon-link"
-          aria-label="Reddit: Valdez Capital Holdings, LLC"
-          title="Reddit: Valdez Capital Holdings, LLC"
-        >
-          <svg class="footer-icon" viewBox="0 0 24 24" role="img" aria-hidden="true">
-            <path d="M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12Zm-4.26.42a2.06 2.06 0 0 0-2.06-2.06c-.52 0-1 .2-1.36.52-1.36-.94-3.18-1.54-5.18-1.62l.88-4.14 2.86.62a1.46 1.46 0 1 0 .18-.92l-3.34-.72a.5.5 0 0 0-.6.39l-1.02 4.78c-2.02.08-3.86.68-5.22 1.62-.36-.32-.84-.52-1.36-.52a2.06 2.06 0 0 0-1.47 3.51c-.02.18-.03.36-.03.55 0 3.22 3.8 5.84 8.5 5.84s8.5-2.62 8.5-5.84c0-.19-.01-.37-.03-.55.48-.38.79-.97.79-1.64ZM7.88 14.5a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm8.24 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm-8.12 2.34a.5.5 0 0 1 .7.07c.74.86 1.94 1.39 3.3 1.39s2.56-.53 3.3-1.39a.5.5 0 0 1 .77.63c-.92 1.07-2.38 1.76-4.07 1.76s-3.15-.69-4.07-1.76a.5.5 0 0 1 .07-.7Z"/>
-          </svg>
-        </a>
+      <div class="footer-links">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#compare">Compare</a>
+        <a href="#proof">Proof Scores</a>
+        <a href="#research">Docs</a>
       </div>
     </div>
   </footer>
 
-  <!-- CoinMarketCap widget script -->
-  <script src="https://files.coinmarketcap.com/static/widget/currency.js"></script>
-
-  <!-- Site JS -->
+  <!-- TradingView -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
   <script src="./app.js"></script>
-
-  <!-- Chart Zoom Modal -->
-  <div id="chartModal" class="chart-modal" aria-hidden="true">
-    <div class="chart-modal__backdrop" data-close="1"></div>
-
-    <div class="chart-modal__panel" role="dialog" aria-modal="true" aria-label="Expanded chart">
-      <button class="chart-modal__close" id="chartModalClose" type="button" aria-label="Close expanded chart">
-        ✕
-      </button>
-
-      <div class="chart-modal__title" id="chartModalTitle">Chart</div>
-      <div class="chart-modal__body">
-        <div id="chartModalTV" class="chart-modal__tv"></div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>
