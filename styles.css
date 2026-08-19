@@ -1966,3 +1966,46 @@ button {
   }
 
 }
+/* =========================================================
+   MARKET TICKER — TERMINAL STYLE
+========================================================= */
+
+.ticker-section {
+  background: #070a0e;
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.ticker-wrapper {
+  min-height: 64px;
+}
+
+.ticker-label {
+  min-width: 110px;
+
+  color: var(--gold-light);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 0.18em;
+}
+
+.ticker-item {
+  min-width: 165px;
+
+  padding: 0 24px;
+}
+
+.ticker-item span {
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+}
+
+.ticker-item strong {
+  font-size: 11px;
+
+  letter-spacing: 0.08em;
+}
