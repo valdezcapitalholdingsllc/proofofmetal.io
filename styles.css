@@ -2045,3 +2045,220 @@ button {
 
   letter-spacing: 0.1em;
 }
+/* =========================================================
+   DIGITAL METALS
+========================================================= */
+
+.token-section {
+  background:
+    linear-gradient(
+      180deg,
+      #05070a,
+      #070a0f
+    );
+}
+
+.token-card {
+  position: relative;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.045),
+      rgba(255,255,255,0.012)
+    );
+}
+
+.token-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(217,169,40,0.55),
+      transparent
+    );
+
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+.token-card:hover::before {
+  opacity: 1;
+}
+
+.proof-score {
+  min-width: 55px;
+}
+
+.proof-score small {
+  margin-bottom: -2px;
+}
+/* =========================================================
+   COMPARISON — FEATURED TERMINAL
+========================================================= */
+
+.comparison-section {
+  position: relative;
+
+  padding-top: 115px;
+  padding-bottom: 115px;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(217,169,40,0.055),
+      transparent 35%
+    ),
+    #080b10;
+}
+
+.comparison-main {
+  border-color: rgba(217,169,40,0.18);
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,0.28);
+}
+
+.comparison-header {
+  margin: 10px 0 30px;
+}
+
+.comparison-header strong {
+  font-size: 26px;
+
+  letter-spacing: -0.03em;
+}
+
+.comparison-vs {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--border-gold);
+
+  border-radius: 50%;
+
+  color: var(--gold-light);
+
+  font-size: 10px;
+}
+/* =========================================================
+   PROOF SCORES
+========================================================= */
+
+.score-table {
+  overflow: hidden;
+
+  border-color: rgba(217,169,40,0.16);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.18);
+}
+
+.score-row {
+  grid-template-columns:
+    1.4fr 1fr 1fr 1fr 0.55fr;
+
+  min-height: 70px;
+}
+
+.score-header {
+  min-height: 48px;
+
+  background: #0b0f15;
+}
+
+.score-row:not(.score-header):hover {
+  background: rgba(217,169,40,0.025);
+}
+
+.score-number {
+  font-family: ui-monospace, monospace;
+
+  font-size: 25px;
+}
+/* =========================================================
+   RESEARCH
+========================================================= */
+
+.research-card {
+  min-height: 165px;
+
+  background: rgba(255,255,255,0.008);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.research-card:hover {
+  background: rgba(217,169,40,0.035);
+
+  border-color: var(--border-gold);
+}
+
+.research-number {
+  font-family: ui-monospace, monospace;
+}
+
+.research-card strong {
+  letter-spacing: 0.02em;
+}
+
+.arrow {
+  transition: transform 0.2s ease;
+}
+
+.research-card:hover .arrow {
+  transform: translateX(5px);
+}
+/* =========================================================
+   THESIS
+========================================================= */
+
+.thesis-section {
+  padding: 155px 20px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(217,169,40,0.09),
+      transparent 42%
+    ),
+    #05070a;
+}
+
+.thesis-inner {
+  max-width: 900px;
+}
+
+.thesis-inner h2 {
+  font-size: clamp(42px, 6vw, 76px);
+
+  line-height: 0.98;
+
+  letter-spacing: -0.055em;
+}
+
+.thesis-inner p {
+  max-width: 680px;
+
+  color: var(--muted-light);
+
+  font-size: 16px;
+
+  line-height: 1.8;
+}
