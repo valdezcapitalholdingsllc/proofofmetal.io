@@ -2009,3 +2009,39 @@ button {
 
   letter-spacing: 0.08em;
 }
+/* =========================================================
+   PHYSICAL → DIGITAL → PROOF
+========================================================= */
+
+.framework-strip {
+  position: relative;
+
+  background:
+    linear-gradient(
+      90deg,
+      #080b10,
+      #0a0e14,
+      #080b10
+    );
+}
+
+.framework-item {
+  min-height: 165px;
+
+  padding-top: 38px;
+  padding-bottom: 38px;
+
+  transition: background 0.2s ease;
+}
+
+.framework-item:hover {
+  background: rgba(217,169,40,0.035);
+}
+
+.framework-number {
+  color: var(--gold-light);
+
+  font-family: ui-monospace, monospace;
+
+  letter-spacing: 0.1em;
+}
