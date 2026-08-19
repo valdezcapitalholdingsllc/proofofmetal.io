@@ -35,21 +35,30 @@
 
     <a href="#top" class="brand">
 
-      <img
-        src="logo.png"
-        alt="Proof Of Metal"
-        class="brand-logo"
-      >
+  <div class="brand-mark">
+    <img
+      src="./assets/logo.png"
+      alt="Proof Of Metal"
+      class="brand-logo"
+      onerror="this.style.display='none'; this.parentElement.classList.add('fallback-mark');"
+    >
 
-      <div class="brand-text">
-        <span class="brand-name">PROOF OF METAL</span>
+    <span class="brand-fallback">PM</span>
+  </div>
 
-        <span class="brand-tagline">
-          On-chain transparency for precious metals
-        </span>
-      </div>
+  <div class="brand-text">
 
-    </a>
+    <span class="brand-name">
+      PROOF OF METAL
+    </span>
+
+    <span class="brand-tagline">
+      Digital intelligence for physical metal
+    </span>
+
+  </div>
+
+</a>
 
     <button
       class="nav-toggle"
