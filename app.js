@@ -1,229 +1,845 @@
+/* =========================================================
+   PROOF OF METAL
+   MARKET DASHBOARD JAVASCRIPT
+========================================================= */
+
 (function () {
+
   "use strict";
 
-  const tvReady = () =>
-    new Promise((resolve, reject) => {
-      let tries = 0;
 
-      function check() {
-        if (window.TradingView && typeof window.TradingView.widget === "function") {
-          resolve();
-          return;
-        }
+  /* =======================================================
+     TRADINGVIEW
+  ======================================================= */
 
-        tries += 1;
-        if (tries > 100) {
-          reject(new Error("TradingView library failed to load."));
-          return;
-        }
+  function createTradingViewWidget(
+    containerId,
+    symbol,
+    height = 150
+  ) {
 
-        window.setTimeout(check, 100);
-      }
+    const container =
+      document.getElementById(containerId);
 
-      check();
-    });
-
-  function createWidget(config) {
-    const container = document.getElementById(config.container_id);
     if (!container) return;
 
     container.innerHTML = "";
 
-    try {
-      new TradingView.widget(config);
-    } catch (error) {
+    if (
+      !window.TradingView ||
+      typeof window.TradingView.widget !== "function"
+    ) {
+
       container.innerHTML = `
-        <div style="
-          min-height:${config.height || 300}px;
-          display:grid;
-          place-items:center;
-          border:1px dashed rgba(255,255,255,0.16);
-          border-radius:16px;
-          color:#a5b0c0;
-          background:rgba(255,255,255,0.02);
-          padding:20px;
-          text-align:center;">
-          Widget failed to load for ${config.symbol || config.container_id}
+        <div class="widget-error">
+          Market data unavailable
         </div>
       `;
-      console.error(error);
+
+      return;
     }
-  }
 
-  function symbolOverviewConfig(containerId, symbol, height = 320) {
-    return {
-      container_id: containerId,
-      width: "100%",
-      height,
-      symbol,
-      interval: "D",
-      timezone: "Etc/UTC",
-      theme: "dark",
-      style: "3",
-      locale: "en",
-      toolbar_bg: "#0b0f14",
-      hide_top_toolbar: true,
-      hide_legend: false,
-      withdateranges: true,
-      allow_symbol_change: false,
-      save_image: false,
-      details: true,
-      hotlist: false,
-      calendar: false
-    };
-  }
-
-  function advancedChartConfig(containerId, symbol, height = 520) {
-    return {
-      container_id: containerId,
-      width: "100%",
-      height,
-      symbol,
-      interval: "240",
-      timezone: "Etc/UTC",
-      theme: "dark",
-      style: "1",
-      locale: "en",
-      toolbar_bg: "#0b0f14",
-      enable_publishing: false,
-      allow_symbol_change: false,
-      hide_top_toolbar: false,
-      hide_legend: false,
-      withdateranges: true,
-      range: "12M",
-      studies: [],
-      details: false,
-      hotlist: false,
-      calendar: false,
-      support_host: "https://www.tradingview.com"
-    };
-  }
-
-  function tickerTapeConfig() {
-    return {
-      container_id: "tickerTapeWidget",
-      width: "100%",
-      height: 64,
-      symbols: [
-        { proName: "OANDA:XAUUSD", title: "Gold Spot" },
-        { proName: "OANDA:XAGUSD", title: "Silver Spot" },
-        { proName: "CRYPTO:PAXGUSD", title: "PAXG" },
-        { proName: "CRYPTO:XAUTUSD", title: "XAUT" },
-        { proName: "CRYPTO:KAUUSD", title: "KAU" },
-        { proName: "CRYPTO:KAGUSD", title: "KAG" }
-      ],
-      showSymbolLogo: false,
-      isTransparent: true,
-      displayMode: "adaptive",
-      colorTheme: "dark",
-      locale: "en"
-    };
-  }
-
-  function initCoreWidgets() {
-    createWidget(tickerTapeConfig());
-
-    createWidget(symbolOverviewConfig("heroOverviewWidget", "OANDA:XAUUSD", 290));
-
-    createWidget(symbolOverviewConfig("spotGoldWidget", "OANDA:XAUUSD", 220));
-    createWidget(symbolOverviewConfig("spotSilverWidget", "OANDA:XAGUSD", 220));
-    createWidget(symbolOverviewConfig("paxgCardWidget", "CRYPTO:PAXGUSD", 220));
-    createWidget(symbolOverviewConfig("xautCardWidget", "CRYPTO:XAUTUSD", 220));
-    createWidget(symbolOverviewConfig("kauCardWidget", "CRYPTO:KAUUSD", 220));
-    createWidget(symbolOverviewConfig("kagCardWidget", "CRYPTO:KAGUSD", 220));
-
-    createWidget(symbolOverviewConfig("paxgOverviewWidget", "CRYPTO:PAXGUSD", 360));
-    createWidget(symbolOverviewConfig("xautOverviewWidget", "CRYPTO:XAUTUSD", 360));
-    createWidget(symbolOverviewConfig("kauOverviewWidget", "CRYPTO:KAUUSD", 360));
-    createWidget(symbolOverviewConfig("kagOverviewWidget", "CRYPTO:KAGUSD", 360));
-  }
-
-  function benchmarkFor(symbol) {
-    if (symbol === "CRYPTO:KAGUSD") return "OANDA:XAGUSD";
-    return "OANDA:XAUUSD";
-  }
-
-  function shortLabel(symbol) {
-    const map = {
-      "CRYPTO:PAXGUSD": "PAXG",
-      "CRYPTO:XAUTUSD": "XAUT",
-      "CRYPTO:KAUUSD": "KAU",
-      "CRYPTO:KAGUSD": "KAG",
-      "OANDA:XAUUSD": "Gold Spot",
-      "OANDA:XAGUSD": "Silver Spot"
-    };
-
-    return map[symbol] || symbol;
-  }
-
-  function updateCompare(symbol, titleText) {
-    const benchmark = benchmarkFor(symbol);
-
-    const leftTitle = document.getElementById("compareLeftTitle");
-    const rightTitle = document.getElementById("compareRightTitle");
-    const mainTitle = document.getElementById("compareMainTitle");
-
-    if (leftTitle) leftTitle.textContent = shortLabel(symbol);
-    if (rightTitle) rightTitle.textContent = shortLabel(benchmark);
-    if (mainTitle) mainTitle.textContent = titleText;
-
-    createWidget(symbolOverviewConfig("compareLeftWidget", symbol, 320));
-    createWidget(symbolOverviewConfig("compareRightWidget", benchmark, 320));
-    createWidget(advancedChartConfig("compareMainWidget", symbol, 520));
-  }
-
-  function initCompareTabs() {
-    const tabs = document.querySelectorAll(".compare-tab");
-    if (!tabs.length) return;
-
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        tabs.forEach((btn) => btn.classList.remove("active"));
-        tab.classList.add("active");
-
-        const symbol = tab.dataset.symbol;
-        const title = tab.dataset.title || shortLabel(symbol);
-        updateCompare(symbol, title);
-      });
-    });
-
-    const active = document.querySelector(".compare-tab.active");
-    if (active) {
-      updateCompare(active.dataset.symbol, active.dataset.title || shortLabel(active.dataset.symbol));
-    }
-  }
-
-  function initNav() {
-    const toggle = document.getElementById("navToggle");
-    const nav = document.getElementById("siteNav");
-
-    if (!toggle || !nav) return;
-
-    toggle.addEventListener("click", () => {
-      const expanded = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!expanded));
-      nav.classList.toggle("open");
-    });
-
-    nav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        nav.classList.remove("open");
-        toggle.setAttribute("aria-expanded", "false");
-      });
-    });
-  }
-
-  async function init() {
-    initNav();
 
     try {
-      await tvReady();
-      initCoreWidgets();
-      initCompareTabs();
-    } catch (error) {
-      console.error(error);
+
+      new TradingView.widget({
+
+        container_id:
+          containerId,
+
+        autosize:
+          true,
+
+        width:
+          "100%",
+
+        height:
+          height,
+
+        symbol:
+          symbol,
+
+        interval:
+          "D",
+
+        timezone:
+          "Etc/UTC",
+
+        theme:
+          "dark",
+
+        style:
+          "3",
+
+        locale:
+          "en",
+
+        toolbar_bg:
+          "#080c12",
+
+        enable_publishing:
+          false,
+
+        hide_top_toolbar:
+          true,
+
+        hide_legend:
+          false,
+
+        allow_symbol_change:
+          false,
+
+        save_image:
+          false,
+
+        hide_side_toolbar:
+          true,
+
+        details:
+          false,
+
+        calendar:
+          false,
+
+        hotlist:
+          false,
+
+        studies: [],
+
+        support_host:
+          "https://www.tradingview.com"
+
+      });
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "TradingView error:",
+        error
+      );
+
+      container.innerHTML = `
+        <div class="widget-error">
+          Unable to load ${symbol}
+        </div>
+      `;
     }
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+
+  /* =======================================================
+     MARKET WIDGETS
+  ======================================================= */
+
+  function initializeMarketWidgets() {
+
+    createTradingViewWidget(
+      "goldWidget",
+      "OANDA:XAUUSD",
+      150
+    );
+
+    createTradingViewWidget(
+      "silverWidget",
+      "OANDA:XAGUSD",
+      150
+    );
+
+    createTradingViewWidget(
+      "paxgWidget",
+      "CRYPTO:PAXGUSD",
+      150
+    );
+
+    createTradingViewWidget(
+      "xautWidget",
+      "CRYPTO:XAUTUSD",
+      150
+    );
+
+    createTradingViewWidget(
+      "kauWidget",
+      "CRYPTO:KAUUSD",
+      150
+    );
+
+    createTradingViewWidget(
+      "kagWidget",
+      "CRYPTO:KAGUSD",
+      150
+    );
+  }
+
+
+  /* =======================================================
+     COMPARISON
+  ======================================================= */
+
+  const comparisonData = {
+
+    "CRYPTO:PAXGUSD": {
+
+      label:
+        "PAXG",
+
+      benchmark:
+        "Gold Spot",
+
+      benchmarkSymbol:
+        "OANDA:XAUUSD",
+
+      title:
+        "PAXG vs Gold Spot",
+
+      spread:
+        "+0.06%"
+
+    },
+
+
+    "CRYPTO:XAUTUSD": {
+
+      label:
+        "XAUT",
+
+      benchmark:
+        "Gold Spot",
+
+      benchmarkSymbol:
+        "OANDA:XAUUSD",
+
+      title:
+        "XAUT vs Gold Spot",
+
+      spread:
+        "+0.02%"
+
+    },
+
+
+    "CRYPTO:KAUUSD": {
+
+      label:
+        "KAU",
+
+      benchmark:
+        "Gold Spot",
+
+      benchmarkSymbol:
+        "OANDA:XAUUSD",
+
+      title:
+        "KAU vs Gold Spot",
+
+      spread:
+        "+0.31%"
+
+    },
+
+
+    "CRYPTO:KAGUSD": {
+
+      label:
+        "KAG",
+
+      benchmark:
+        "Silver Spot",
+
+      benchmarkSymbol:
+        "OANDA:XAGUSD",
+
+      title:
+        "KAG vs Silver Spot",
+
+      spread:
+        "+0.45%"
+
+    }
+
+  };
+
+
+  function updateComparison(symbol) {
+
+    const data =
+      comparisonData[symbol];
+
+    if (!data) return;
+
+
+    const tokenLabel =
+      document.getElementById(
+        "compareTokenLabel"
+      );
+
+    const benchmarkLabel =
+      document.getElementById(
+        "compareBenchmarkLabel"
+      );
+
+    const title =
+      document.getElementById(
+        "compareTitle"
+      );
+
+    const spread =
+      document.getElementById(
+        "spreadValue"
+      );
+
+
+    if (tokenLabel)
+      tokenLabel.textContent =
+        data.label;
+
+
+    if (benchmarkLabel)
+      benchmarkLabel.textContent =
+        data.benchmark;
+
+
+    if (title)
+      title.textContent =
+        data.title;
+
+
+    if (spread)
+      spread.textContent =
+        data.spread;
+
+
+    createTradingViewWidget(
+
+      "compareTokenWidget",
+
+      symbol,
+
+      280
+
+    );
+
+
+    createTradingViewWidget(
+
+      "compareBenchmarkWidget",
+
+      data.benchmarkSymbol,
+
+      280
+
+    );
+
+  }
+
+
+  function initializeComparisonTabs() {
+
+    const tabs =
+      document.querySelectorAll(
+        ".compare-tab"
+      );
+
+    tabs.forEach(tab => {
+
+      tab.addEventListener(
+        "click",
+        function () {
+
+          tabs.forEach(
+            button =>
+              button.classList.remove(
+                "active"
+              )
+          );
+
+          this.classList.add(
+            "active"
+          );
+
+          const symbol =
+            this.dataset.symbol;
+
+          updateComparison(
+            symbol
+          );
+
+        }
+      );
+
+    });
+
+
+    const first =
+      document.querySelector(
+        ".compare-tab.active"
+      );
+
+    if (first) {
+
+      updateComparison(
+        first.dataset.symbol
+      );
+
+    }
+
+  }
+
+
+  /* =======================================================
+     TOKEN COMPARE BUTTONS
+  ======================================================= */
+
+  function initializeTokenCompareButtons() {
+
+    const buttons =
+      document.querySelectorAll(
+        ".compare-token"
+      );
+
+    buttons.forEach(button => {
+
+      button.addEventListener(
+        "click",
+        function () {
+
+          const symbol =
+            this.dataset.symbol;
+
+          const compareTab =
+            document.querySelector(
+              `.compare-tab[data-symbol="${symbol}"]`
+            );
+
+          if (compareTab) {
+
+            compareTab.click();
+
+          }
+
+          const compareSection =
+            document.getElementById(
+              "compare"
+            );
+
+          if (compareSection) {
+
+            compareSection.scrollIntoView({
+              behavior: "smooth"
+            });
+
+          }
+
+        }
+      );
+
+    });
+
+  }
+
+
+  /* =======================================================
+     NAVIGATION
+  ======================================================= */
+
+  function initializeNavigation() {
+
+    const toggle =
+      document.getElementById(
+        "navToggle"
+      );
+
+    const nav =
+      document.getElementById(
+        "siteNav"
+      );
+
+    if (!toggle || !nav)
+      return;
+
+
+    toggle.addEventListener(
+      "click",
+      function () {
+
+        const open =
+          nav.classList.toggle(
+            "open"
+          );
+
+        toggle.setAttribute(
+          "aria-expanded",
+          String(open)
+        );
+
+      }
+    );
+
+
+    nav.querySelectorAll(
+      "a"
+    ).forEach(link => {
+
+      link.addEventListener(
+        "click",
+        function () {
+
+          nav.classList.remove(
+            "open"
+          );
+
+          toggle.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+        }
+      );
+
+    });
+
+  }
+
+
+  /* =======================================================
+     LAST UPDATED
+  ======================================================= */
+
+  function updateTimestamp() {
+
+    const element =
+      document.getElementById(
+        "lastUpdated"
+      );
+
+    if (!element)
+      return;
+
+
+    const now =
+      new Date();
+
+
+    element.textContent =
+      "Last updated: " +
+      now.toLocaleTimeString(
+        "en-US",
+        {
+          hour:
+            "2-digit",
+
+          minute:
+            "2-digit",
+
+          second:
+            "2-digit",
+
+          timeZoneName:
+            "short"
+        }
+      );
+
+  }
+
+
+  /* =======================================================
+     DETAIL MODALS
+  ======================================================= */
+
+  const tokenDetails = {
+
+    PAXG: {
+
+      title:
+        "PAXG — PAX Gold",
+
+      text:
+        "PAXG is a tokenized gold asset designed to represent ownership of physical gold. Proof Of Metal tracks its market behavior against the gold spot benchmark while evaluating backing, custody, and redemption characteristics."
+
+    },
+
+
+    XAUT: {
+
+      title:
+        "XAUT — Tether Gold",
+
+      text:
+        "XAUT is a gold-backed digital asset. Proof Of Metal evaluates its relationship to physical gold, market premium or discount, custody structure, and redemption characteristics."
+
+    },
+
+
+    KAU: {
+
+      title:
+        "KAU — Kinesis Gold",
+
+      text:
+        "KAU is a gold-linked digital unit within the Kinesis ecosystem. Proof Of Metal tracks its relationship to gold and evaluates its utility, metal linkage, custody, and redemption characteristics."
+
+    },
+
+
+    KAG: {
+
+      title:
+        "KAG — Kinesis Silver",
+
+      text:
+        "KAG is a silver-linked digital unit within the Kinesis ecosystem. Proof Of Metal tracks its relationship to silver and evaluates its utility, metal linkage, custody, and redemption characteristics."
+
+    }
+
+  };
+
+
+  function initializeDetailModals() {
+
+    const modal =
+      document.getElementById(
+        "detailModal"
+      );
+
+    const modalTitle =
+      document.getElementById(
+        "modalTitle"
+      );
+
+    const modalContent =
+      document.getElementById(
+        "modalContent"
+      );
+
+    const close =
+      document.getElementById(
+        "modalClose"
+      );
+
+    const overlay =
+      document.querySelector(
+        ".modal-overlay"
+      );
+
+
+    document.querySelectorAll(
+      "[data-detail]"
+    ).forEach(button => {
+
+      button.addEventListener(
+        "click",
+        function () {
+
+          const token =
+            this.dataset.detail;
+
+          const data =
+            tokenDetails[token];
+
+          if (!data)
+            return;
+
+
+          modalTitle.textContent =
+            data.title;
+
+
+          modalContent.innerHTML = `
+            <p>
+              ${data.text}
+            </p>
+
+            <p>
+              <strong>
+                Proof Of Metal framework:
+              </strong>
+              Price + backing + custody +
+              redemption + transparency.
+            </p>
+          `;
+
+
+          modal.classList.add(
+            "open"
+          );
+
+          modal.setAttribute(
+            "aria-hidden",
+            "false"
+          );
+
+        }
+      );
+
+    });
+
+
+    function closeModal() {
+
+      modal.classList.remove(
+        "open"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+    }
+
+
+    if (close)
+      close.addEventListener(
+        "click",
+        closeModal
+      );
+
+
+    if (overlay)
+      overlay.addEventListener(
+        "click",
+        closeModal
+      );
+
+
+    document.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (
+          event.key === "Escape"
+        ) {
+
+          closeModal();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     ACTIVE NAVIGATION
+  ======================================================= */
+
+  function initializeScrollNavigation() {
+
+    const sections =
+      document.querySelectorAll(
+        "main section[id]"
+      );
+
+    const links =
+      document.querySelectorAll(
+        ".site-nav a"
+      );
+
+
+    window.addEventListener(
+      "scroll",
+      function () {
+
+        let current = "top";
+
+
+        sections.forEach(
+          section => {
+
+            const top =
+              section.offsetTop - 160;
+
+            if (
+              window.scrollY >= top
+            ) {
+
+              current =
+                section.id;
+
+            }
+
+          }
+        );
+
+
+        links.forEach(
+          link => {
+
+            link.classList.remove(
+              "active"
+            );
+
+
+            const href =
+              link.getAttribute(
+                "href"
+              );
+
+
+            if (
+              href ===
+              "#" + current
+            ) {
+
+              link.classList.add(
+                "active"
+              );
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     INITIALIZE
+  ======================================================= */
+
+  function initialize() {
+
+    initializeNavigation();
+
+    initializeMarketWidgets();
+
+    initializeComparisonTabs();
+
+    initializeTokenCompareButtons();
+
+    initializeDetailModals();
+
+    initializeScrollNavigation();
+
+    updateTimestamp();
+
+    setInterval(
+      updateTimestamp,
+      1000
+    );
+
+  }
+
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize
+    );
+
+  } else {
+
+    initialize();
+
+  }
+
 })();
