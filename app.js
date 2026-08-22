@@ -1,94 +1,206 @@
-(function () {
+/* =========================================================
+   PROOF OF METAL
+   app.js
+   Digital Metal Intelligence
+========================================================= */
+
+(() => {
   "use strict";
 
-  /*
-   * =========================================================
-   * PROOF OF METAL
-   * app.js
-   *
-   * Handles:
-   * - TradingView market widgets
-   * - Token/metal comparisons
-   * - Navigation
-   * - Mobile navigation
-   * - Scroll spy
-   * - Asset detail modal
-   * - Last updated timestamp
-   * =========================================================
-   */
+  /* =========================================================
+     CONFIGURATION
+  ========================================================= */
+
+  const CONFIG = {
+    tradingViewTimeout: 15000,
+    comparisonHeight: 520,
+    marketHeight: 270,
+
+    markets: {
+      gold: {
+        symbol: "OANDA:XAUUSD",
+        label: "XAU/USD",
+        name: "GOLD SPOT",
+        type: "BENCHMARK",
+        metal: "GOLD"
+      },
+
+      silver: {
+        symbol: "OANDA:XAGUSD",
+        label: "XAG/USD",
+        name: "SILVER SPOT",
+        type: "BENCHMARK",
+        metal: "SILVER"
+      },
+
+      paxg: {
+        symbol: "CRYPTO:PAXGUSD",
+        label: "PAXG/USD",
+        name: "PAX GOLD",
+        type: "TOKEN",
+        metal: "GOLD"
+      },
+
+      xaut: {
+        symbol: "CRYPTO:XAUTUSD",
+        label: "XAUT/USD",
+        name: "TETHER GOLD",
+        type: "TOKEN",
+        metal: "GOLD"
+      },
+
+      kau: {
+        symbol: "CRYPTO:KAUUSD",
+        label: "KAU/USD",
+        name: "KINESIS GOLD",
+        type: "TOKEN",
+        metal: "GOLD"
+      },
+
+      kag: {
+        symbol: "CRYPTO:KAGUSD",
+        label: "KAG/USD",
+        name: "KINESIS SILVER",
+        type: "TOKEN",
+        metal: "SILVER"
+      }
+    }
+  };
 
 
   /* =========================================================
-     TRADINGVIEW READY CHECK
+     HELPERS
+  ========================================================= */
+
+  const $ = (selector, parent = document) =>
+    parent.querySelector(selector);
+
+  const $$ = (selector, parent = document) =>
+    Array.from(parent.querySelectorAll(selector));
+
+
+  function getElement(id) {
+    return document.getElementById(id);
+  }
+
+
+  function safeText(element, value) {
+    if (element) {
+      element.textContent = value ?? "";
+    }
+  }
+
+
+  /* =========================================================
+     TRADINGVIEW LOADER
   ========================================================= */
 
   function waitForTradingView() {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
 
-      var attempts = 0;
-      var maxAttempts = 100;
+      if (
+        window.TradingView &&
+        typeof window.TradingView.widget === "function"
+      ) {
+        resolve();
+        return;
+      }
 
-      function check() {
+      const started = Date.now();
+
+      const timer = setInterval(() => {
 
         if (
           window.TradingView &&
           typeof window.TradingView.widget === "function"
         ) {
+          clearInterval(timer);
           resolve();
           return;
         }
 
-        attempts++;
+        if (
+          Date.now() - started >
+          CONFIG.tradingViewTimeout
+        ) {
+          clearInterval(timer);
 
-        if (attempts >= maxAttempts) {
           reject(
-            new Error("TradingView library failed to load.")
+            new Error(
+              "TradingView library did not load."
+            )
           );
-          return;
         }
 
-        window.setTimeout(check, 100);
-      }
+      }, 100);
 
-      check();
     });
   }
 
 
   /* =========================================================
-     TRADINGVIEW WIDGET CREATOR
+     TRADINGVIEW ERROR DISPLAY
   ========================================================= */
 
-  function createTradingViewWidget(
+  function showWidgetMessage(container, message) {
+
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="widget-status-message">
+        <span class="widget-status-dot"></span>
+        <span>${message}</span>
+      </div>
+    `;
+  }
+
+
+  /* =========================================================
+     CREATE TRADINGVIEW WIDGET
+  ========================================================= */
+
+  function createTradingViewWidget({
     containerId,
     symbol,
-    height,
-    advanced
-  ) {
+    height = CONFIG.marketHeight,
+    advanced = false
+  }) {
 
-    var container =
-      document.getElementById(containerId);
+    const container =
+      getElement(containerId);
 
     if (!container) {
-      console.warn(
-        "Proof Of Metal: container not found:",
-        containerId
-      );
-      return;
+      return null;
     }
 
     container.innerHTML = "";
 
-    var config = {
+    if (
+      !window.TradingView ||
+      typeof window.TradingView.widget !== "function"
+    ) {
+      showWidgetMessage(
+        container,
+        "MARKET DATA INITIALIZING..."
+      );
+
+      return null;
+    }
+
+
+    const config = {
+
       container_id: containerId,
+
+      autosize: true,
 
       width: "100%",
 
-      height: height || 300,
+      height,
 
-      symbol: symbol,
+      symbol,
 
-      interval: advanced ? "240" : "D",
+      interval: advanced ? "60" : "D",
 
       timezone: "Etc/UTC",
 
@@ -104,11 +216,15 @@
 
       allow_symbol_change: false,
 
+      hide_side_toolbar: !advanced,
+
       hide_top_toolbar: !advanced,
 
       hide_legend: !advanced,
 
-      withdateranges: true,
+      hide_volume: false,
+
+      withdateranges: advanced,
 
       save_image: false,
 
@@ -127,7 +243,9 @@
 
     try {
 
-      new window.TradingView.widget(config);
+      return new window.TradingView.widget(
+        config
+      );
 
     } catch (error) {
 
@@ -136,68 +254,214 @@
         error
       );
 
-      container.innerHTML = `
-        <div class="widget-error">
-          <strong>Market data unavailable</strong>
-          <span>Please try again shortly.</span>
-        </div>
-      `;
+      showWidgetMessage(
+        container,
+        "MARKET DATA UNAVAILABLE"
+      );
+
+      return null;
     }
   }
 
 
   /* =========================================================
-     MARKET WIDGETS
+     LIVE MARKET CARDS
   ========================================================= */
 
-  function initMarketWidgets() {
+  function initializeLiveMarkets() {
 
-    createTradingViewWidget(
-      "goldWidget",
-      "OANDA:XAUUSD",
-      260,
-      false
-    );
+    const widgets = [
+
+      {
+        id: "goldWidget",
+        market: CONFIG.markets.gold,
+        height: 270
+      },
+
+      {
+        id: "silverWidget",
+        market: CONFIG.markets.silver,
+        height: 270
+      },
+
+      {
+        id: "paxgWidget",
+        market: CONFIG.markets.paxg,
+        height: 230
+      },
+
+      {
+        id: "xautWidget",
+        market: CONFIG.markets.xaut,
+        height: 230
+      },
+
+      {
+        id: "kauWidget",
+        market: CONFIG.markets.kau,
+        height: 230
+      },
+
+      {
+        id: "kagWidget",
+        market: CONFIG.markets.kag,
+        height: 230
+      }
+
+    ];
 
 
-    createTradingViewWidget(
-      "silverWidget",
-      "OANDA:XAGUSD",
-      260,
-      false
-    );
+    widgets.forEach(item => {
+
+      createTradingViewWidget({
+        containerId: item.id,
+        symbol: item.market.symbol,
+        height: item.height,
+        advanced: false
+      });
+
+    });
 
 
-    createTradingViewWidget(
-      "paxgWidget",
-      "CRYPTO:PAXGUSD",
-      210,
-      false
-    );
+    initializeMarketInteraction();
+  }
 
 
-    createTradingViewWidget(
-      "xautWidget",
-      "CRYPTO:XAUTUSD",
-      210,
-      false
-    );
+  /* =========================================================
+     LIVE MARKET INTERACTION
+  ========================================================= */
+
+  function initializeMarketInteraction() {
+
+    const cards =
+      $$(".market-card");
 
 
-    createTradingViewWidget(
-      "kauWidget",
-      "CRYPTO:KAUUSD",
-      210,
-      false
-    );
+    if (!cards.length) {
+      return;
+    }
 
 
-    createTradingViewWidget(
-      "kagWidget",
-      "CRYPTO:KAGUSD",
-      210,
-      false
-    );
+    cards.forEach(card => {
+
+      card.setAttribute(
+        "tabindex",
+        "0"
+      );
+
+      card.setAttribute(
+        "role",
+        "button"
+      );
+
+
+      const symbol =
+        card.dataset.symbol ||
+        card.dataset.asset;
+
+
+      function activateCard() {
+
+        cards.forEach(item => {
+          item.classList.remove(
+            "market-card-active"
+          );
+        });
+
+        card.classList.add(
+          "market-card-active"
+        );
+
+
+        if (symbol) {
+          focusComparison(symbol);
+        }
+
+      }
+
+
+      card.addEventListener(
+        "click",
+        activateCard
+      );
+
+
+      card.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
+
+            event.preventDefault();
+
+            activateCard();
+
+          }
+
+        }
+      );
+
+    });
+
+  }
+
+
+  /* =========================================================
+     MARKET SYMBOL NORMALIZATION
+  ========================================================= */
+
+  function normalizeSymbol(value) {
+
+    if (!value) return null;
+
+    const normalized =
+      value.toLowerCase().trim();
+
+
+    const aliases = {
+
+      gold:
+        "OANDA:XAUUSD",
+
+      xau:
+        "OANDA:XAUUSD",
+
+      xauusd:
+        "OANDA:XAUUSD",
+
+      silver:
+        "OANDA:XAGUSD",
+
+      xag:
+        "OANDA:XAGUSD",
+
+      xagusd:
+        "OANDA:XAGUSD",
+
+      paxg:
+        "CRYPTO:PAXGUSD",
+
+      xaut:
+        "CRYPTO:XAUTUSD",
+
+      kau:
+        "CRYPTO:KAUUSD",
+
+      kag:
+        "CRYPTO:KAGUSD"
+
+    };
+
+
+    if (aliases[normalized]) {
+      return aliases[normalized];
+    }
+
+
+    return value;
   }
 
 
@@ -205,7 +469,7 @@
      COMPARISON DATA
   ========================================================= */
 
-  var tokenLabels = {
+  const comparisonLabels = {
 
     "CRYPTO:PAXGUSD": "PAXG",
 
@@ -213,37 +477,50 @@
 
     "CRYPTO:KAUUSD": "KAU",
 
-    "CRYPTO:KAGUSD": "KAG"
+    "CRYPTO:KAGUSD": "KAG",
+
+    "OANDA:XAUUSD": "GOLD",
+
+    "OANDA:XAGUSD": "SILVER"
+
+  };
+
+
+  const comparisonNames = {
+
+    "CRYPTO:PAXGUSD":
+      "PAX GOLD",
+
+    "CRYPTO:XAUTUSD":
+      "TETHER GOLD",
+
+    "CRYPTO:KAUUSD":
+      "KINESIS GOLD",
+
+    "CRYPTO:KAGUSD":
+      "KINESIS SILVER",
+
+    "OANDA:XAUUSD":
+      "GOLD SPOT",
+
+    "OANDA:XAGUSD":
+      "SILVER SPOT"
+
   };
 
 
   function getBenchmark(symbol) {
 
-    if (symbol === "CRYPTO:KAGUSD") {
+    if (
+      symbol === "CRYPTO:KAGUSD" ||
+      symbol === "OANDA:XAGUSD"
+    ) {
+
       return "OANDA:XAGUSD";
     }
 
+
     return "OANDA:XAUUSD";
-  }
-
-
-  function getBenchmarkName(symbol) {
-
-    if (symbol === "OANDA:XAGUSD") {
-      return "SILVER SPOT";
-    }
-
-    return "GOLD SPOT";
-  }
-
-
-  function getBenchmarkShortName(symbol) {
-
-    if (symbol === "OANDA:XAGUSD") {
-      return "XAG / USD";
-    }
-
-    return "XAU / USD";
   }
 
 
@@ -251,86 +528,68 @@
      UPDATE COMPARISON
   ========================================================= */
 
-  function updateComparison(symbol, title) {
+  function updateComparison(
+    symbol,
+    title = null
+  ) {
+
+    symbol =
+      normalizeSymbol(symbol);
+
 
     if (!symbol) {
       return;
     }
 
-    var benchmark =
+
+    const benchmark =
       getBenchmark(symbol);
 
 
-    var tokenLabel =
-      document.getElementById(
-        "compareTokenLabel"
-      );
-
-
-    var benchmarkLabel =
-      document.getElementById(
-        "compareBenchmarkLabel"
-      );
-
-
-    var compareTitle =
-      document.getElementById(
-        "compareTitle"
-      );
-
-
-    var benchmarkShort =
-      document.getElementById(
-        "compareBenchmarkShort"
-      );
-
-
-    if (tokenLabel) {
-
-      tokenLabel.textContent =
-        tokenLabels[symbol] || symbol;
-    }
-
-
-    if (benchmarkLabel) {
-
-      benchmarkLabel.textContent =
-        getBenchmarkName(benchmark);
-    }
-
-
-    if (compareTitle) {
-
-      compareTitle.textContent =
-        title || (
-          tokenLabels[symbol] +
-          " vs " +
-          getBenchmarkName(benchmark)
-        );
-    }
-
-
-    if (benchmarkShort) {
-
-      benchmarkShort.textContent =
-        getBenchmarkShortName(benchmark);
-    }
-
-
-    /*
-     * Main comparison chart.
-     *
-     * The chart displays the selected token.
-     * The benchmark information is displayed
-     * alongside it in the comparison interface.
-     */
-
-    createTradingViewWidget(
-      "compareMainWidget",
-      symbol,
-      520,
-      true
+    safeText(
+      getElement("compareTokenLabel"),
+      comparisonLabels[symbol] || symbol
     );
+
+
+    safeText(
+      getElement("compareBenchmarkLabel"),
+      comparisonNames[benchmark] ||
+        benchmark
+    );
+
+
+    safeText(
+      getElement("compareTitle"),
+      title ||
+        comparisonNames[symbol] ||
+        comparisonLabels[symbol] ||
+        symbol
+    );
+
+
+    safeText(
+      getElement("compareBenchmarkShort"),
+      benchmark === "OANDA:XAGUSD"
+        ? "XAG / USD"
+        : "XAU / USD"
+    );
+
+
+    createTradingViewWidget({
+
+      containerId:
+        "compareMainWidget",
+
+      symbol,
+
+      height:
+        CONFIG.comparisonHeight,
+
+      advanced: true
+
+    });
+
   }
 
 
@@ -338,12 +597,10 @@
      COMPARISON TABS
   ========================================================= */
 
-  function initComparisonTabs() {
+  function initializeComparison() {
 
-    var tabs =
-      document.querySelectorAll(
-        ".compare-tab"
-      );
+    const tabs =
+      $$(".compare-tab");
 
 
     if (!tabs.length) {
@@ -351,30 +608,13 @@
     }
 
 
-    tabs.forEach(function (tab) {
+    tabs.forEach(tab => {
 
       tab.addEventListener(
         "click",
-        function () {
+        () => {
 
-          tabs.forEach(
-            function (button) {
-              button.classList.remove(
-                "active"
-              );
-            }
-          );
-
-
-          tab.classList.add(
-            "active"
-          );
-
-
-          updateComparison(
-            tab.dataset.symbol,
-            tab.dataset.title
-          );
+          activateComparisonTab(tab);
 
         }
       );
@@ -382,128 +622,203 @@
     });
 
 
-    /*
-     * Load the currently active comparison
-     * when the page first opens.
-     */
-
-    var activeTab =
-      document.querySelector(
-        ".compare-tab.active"
-      );
+    const active =
+      $(".compare-tab.active") ||
+      tabs[0];
 
 
-    if (activeTab) {
-
-      updateComparison(
-        activeTab.dataset.symbol,
-        activeTab.dataset.title
-      );
-
+    if (active) {
+      activateComparisonTab(active);
     }
+
+  }
+
+
+  function activateComparisonTab(tab) {
+
+    const tabs =
+      $$(".compare-tab");
+
+
+    tabs.forEach(item => {
+
+      item.classList.toggle(
+        "active",
+        item === tab
+      );
+
+    });
+
+
+    const symbol =
+      normalizeSymbol(
+        tab.dataset.symbol
+      );
+
+
+    const title =
+      tab.dataset.title ||
+      comparisonNames[symbol];
+
+
+    updateComparison(
+      symbol,
+      title
+    );
+
   }
 
 
   /* =========================================================
-     TOKEN COMPARE BUTTONS
+     FOCUS COMPARISON
   ========================================================= */
 
-  function initTokenCompareButtons() {
+  function focusComparison(symbol) {
 
-    var buttons =
-      document.querySelectorAll(
-        ".compare-token"
+    symbol =
+      normalizeSymbol(symbol);
+
+
+    if (!symbol) return;
+
+
+    const section =
+      getElement("compare");
+
+
+    const tabs =
+      $$(".compare-tab");
+
+
+    let matchingTab = null;
+
+
+    tabs.forEach(tab => {
+
+      const tabSymbol =
+        normalizeSymbol(
+          tab.dataset.symbol
+        );
+
+
+      if (tabSymbol === symbol) {
+        matchingTab = tab;
+      }
+
+    });
+
+
+    if (matchingTab) {
+
+      activateComparisonTab(
+        matchingTab
       );
 
+    } else {
 
-    if (!buttons.length) {
-      return;
+      updateComparison(symbol);
+
     }
 
 
-    buttons.forEach(function (button) {
+    if (section) {
+
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+  }
+
+
+  /* =========================================================
+     COMPARE BUTTONS
+  ========================================================= */
+
+  function initializeCompareButtons() {
+
+    const buttons =
+      $$(".compare-token");
+
+
+    buttons.forEach(button => {
 
       button.addEventListener(
         "click",
-        function () {
+        event => {
 
-          var symbol =
-            button.dataset.symbol;
-
-          var title =
-            button.dataset.title;
+          event.preventDefault();
 
 
-          var compareSection =
-            document.getElementById(
-              "compare"
+          const symbol =
+            normalizeSymbol(
+              button.dataset.symbol
             );
 
 
-          /*
-           * Scroll to comparison section.
-           */
+          const title =
+            button.dataset.title ||
+            comparisonNames[symbol];
 
-          if (compareSection) {
 
-            compareSection.scrollIntoView({
+          const section =
+            getElement("compare");
+
+
+          const tabs =
+            $$(".compare-tab");
+
+
+          let matchingTab = null;
+
+
+          tabs.forEach(tab => {
+
+            if (
+              normalizeSymbol(
+                tab.dataset.symbol
+              ) === symbol
+            ) {
+
+              matchingTab = tab;
+
+            }
+
+          });
+
+
+          if (matchingTab) {
+
+            activateComparisonTab(
+              matchingTab
+            );
+
+          } else {
+
+            updateComparison(
+              symbol,
+              title
+            );
+
+          }
+
+
+          if (section) {
+
+            section.scrollIntoView({
               behavior: "smooth",
               block: "start"
             });
 
           }
 
-
-          /*
-           * Give the browser a moment to
-           * finish the scroll before changing
-           * the active comparison.
-           */
-
-          window.setTimeout(
-            function () {
-
-              var tabs =
-                document.querySelectorAll(
-                  ".compare-tab"
-                );
-
-
-              tabs.forEach(
-                function (tab) {
-
-                  tab.classList.remove(
-                    "active"
-                  );
-
-
-                  if (
-                    tab.dataset.symbol ===
-                    symbol
-                  ) {
-
-                    tab.classList.add(
-                      "active"
-                    );
-
-                  }
-                }
-              );
-
-
-              updateComparison(
-                symbol,
-                title
-              );
-
-            },
-            450
-          );
-
         }
       );
 
     });
+
   }
 
 
@@ -511,18 +826,13 @@
      MOBILE NAVIGATION
   ========================================================= */
 
-  function initNavigation() {
+  function initializeNavigation() {
 
-    var toggle =
-      document.getElementById(
-        "navToggle"
-      );
+    const toggle =
+      getElement("navToggle");
 
-
-    var nav =
-      document.getElementById(
-        "siteNav"
-      );
+    const nav =
+      getElement("siteNav");
 
 
     if (!toggle || !nav) {
@@ -530,186 +840,176 @@
     }
 
 
+    function closeNavigation() {
+
+      nav.classList.remove("open");
+
+      toggle.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
+    }
+
+
     toggle.addEventListener(
       "click",
-      function () {
+      () => {
 
-        var expanded =
-          toggle.getAttribute(
-            "aria-expanded"
-          ) === "true";
+        const isOpen =
+          nav.classList.contains(
+            "open"
+          );
+
+
+        nav.classList.toggle(
+          "open",
+          !isOpen
+        );
 
 
         toggle.setAttribute(
           "aria-expanded",
-          String(!expanded)
-        );
-
-
-        nav.classList.toggle(
-          "open"
+          String(!isOpen)
         );
 
       }
     );
 
 
-    /*
-     * Close mobile menu after
-     * selecting a navigation link.
-     */
-
-    nav.querySelectorAll(
-      "a"
-    ).forEach(function (link) {
+    $$("a", nav).forEach(link => {
 
       link.addEventListener(
         "click",
-        function () {
-
-          nav.classList.remove(
-            "open"
-          );
-
-
-          toggle.setAttribute(
-            "aria-expanded",
-            "false"
-          );
-
-        }
+        closeNavigation
       );
 
     });
+
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (event.key === "Escape") {
+          closeNavigation();
+        }
+
+      }
+    );
+
   }
 
 
   /* =========================================================
-     ACTIVE NAVIGATION / SCROLL SPY
+     SCROLL SPY
   ========================================================= */
 
-  function initScrollSpy() {
+  function initializeScrollSpy() {
 
-    var links =
-      document.querySelectorAll(
-        ".site-nav a"
-      );
+    const links =
+      $$(".site-nav a");
 
 
-    var sections =
-      document.querySelectorAll(
-        "main section[id]"
-      );
+    const sections =
+      $$("main section[id]");
 
 
     if (
       !links.length ||
-      !sections.length ||
+      !sections.length
+    ) {
+      return;
+    }
+
+
+    if (
       !("IntersectionObserver" in window)
     ) {
       return;
     }
 
 
-    var observer =
+    const observer =
       new IntersectionObserver(
-        function (entries) {
+        entries => {
 
-          entries.forEach(
-            function (entry) {
+          entries.forEach(entry => {
 
-              if (!entry.isIntersecting) {
-                return;
-              }
-
-
-              var targetId =
-                entry.target.id;
+            if (
+              !entry.isIntersecting
+            ) {
+              return;
+            }
 
 
-              links.forEach(
-                function (link) {
+            links.forEach(link => {
 
-                  var href =
-                    link.getAttribute(
-                      "href"
-                    );
-
-
-                  link.classList.remove(
-                    "active"
-                  );
+              const target =
+                link.getAttribute(
+                  "href"
+                );
 
 
-                  if (
-                    href ===
-                    "#" + targetId
-                  ) {
-
-                    link.classList.add(
-                      "active"
-                    );
-
-                  }
-
-                }
+              link.classList.toggle(
+                "active",
+                target ===
+                  "#" +
+                  entry.target.id
               );
 
-            }
-          );
+            });
+
+          });
 
         },
         {
           rootMargin:
-            "-35% 0px -55% 0px"
+            "-30% 0px -60% 0px",
+          threshold: 0
         }
       );
 
 
-    sections.forEach(
-      function (section) {
-        observer.observe(section);
-      }
-    );
+    sections.forEach(section => {
+
+      observer.observe(section);
+
+    });
+
   }
 
 
   /* =========================================================
-     ASSET DETAILS
+     MODAL DATA
   ========================================================= */
 
-  var assetDetails = {
+  const assetDetails = {
 
     PAXG: {
       title: "PAXG — PAX Gold",
-
       text:
-        "PAXG is a digital gold asset designed to represent ownership of physical gold. Proof Of Metal tracks its market behavior alongside the XAU/USD physical gold benchmark."
+        "PAXG is a digital gold asset designed to represent ownership of physical gold. Proof Of Metal tracks its market behavior alongside the XAU/USD gold benchmark."
     },
-
 
     XAUT: {
       title: "XAUT — Tether Gold",
-
       text:
-        "XAUT is a digital asset linked to physical gold. Proof Of Metal tracks its price behavior and evaluates the characteristics of the underlying digital-to-physical relationship."
+        "XAUT is a digital asset linked to physical gold. Proof Of Metal tracks its market behavior alongside the XAU/USD gold benchmark."
     },
-
 
     KAU: {
       title: "KAU — Kinesis Gold",
-
       text:
-        "KAU is a gold-linked digital asset within the Kinesis ecosystem. Proof Of Metal tracks its market price relative to physical gold."
+        "KAU is a gold-linked digital asset within the Kinesis ecosystem. Proof Of Metal tracks its market behavior against the physical gold benchmark."
     },
-
 
     KAG: {
       title: "KAG — Kinesis Silver",
-
       text:
         "KAG is a silver-linked digital asset within the Kinesis ecosystem. Proof Of Metal compares its market behavior against the physical silver benchmark."
     }
+
   };
 
 
@@ -717,12 +1017,10 @@
      DETAIL MODAL
   ========================================================= */
 
-  function initDetailModal() {
+  function initializeModal() {
 
-    var modal =
-      document.getElementById(
-        "detailModal"
-      );
+    const modal =
+      getElement("detailModal");
 
 
     if (!modal) {
@@ -730,33 +1028,23 @@
     }
 
 
-    var closeButton =
-      document.getElementById(
-        "modalClose"
-      );
+    const close =
+      getElement("modalClose");
+
+    const title =
+      getElement("modalTitle");
+
+    const content =
+      getElement("modalContent");
 
 
-    var modalTitle =
-      document.getElementById(
-        "modalTitle"
-      );
-
-
-    var modalContent =
-      document.getElementById(
-        "modalContent"
-      );
-
-
-    var detailButtons =
-      document.querySelectorAll(
-        "[data-detail]"
-      );
+    const buttons =
+      $$("[data-detail]");
 
 
     function openModal(asset) {
 
-      var data =
+      const data =
         assetDetails[asset];
 
 
@@ -765,17 +1053,15 @@
       }
 
 
-      if (modalTitle) {
-
-        modalTitle.textContent =
-          data.title;
-
-      }
+      safeText(
+        title,
+        data.title
+      );
 
 
-      if (modalContent) {
+      if (content) {
 
-        modalContent.innerHTML = `
+        content.innerHTML = `
           <p>${data.text}</p>
         `;
 
@@ -820,27 +1106,27 @@
     }
 
 
-    detailButtons.forEach(
-      function (button) {
+    buttons.forEach(button => {
 
-        button.addEventListener(
-          "click",
-          function () {
+      button.addEventListener(
+        "click",
+        event => {
 
-            openModal(
-              button.dataset.detail
-            );
+          event.preventDefault();
 
-          }
-        );
+          openModal(
+            button.dataset.detail
+          );
 
-      }
-    );
+        }
+      );
+
+    });
 
 
-    if (closeButton) {
+    if (close) {
 
-      closeButton.addEventListener(
+      close.addEventListener(
         "click",
         closeModal
       );
@@ -848,10 +1134,8 @@
     }
 
 
-    var overlay =
-      modal.querySelector(
-        ".modal-overlay"
-      );
+    const overlay =
+      $(".modal-overlay", modal);
 
 
     if (overlay) {
@@ -866,11 +1150,10 @@
 
     document.addEventListener(
       "keydown",
-      function (event) {
+      event => {
 
         if (
-          event.key === "Escape" &&
-          modal.classList.contains("open")
+          event.key === "Escape"
         ) {
 
           closeModal();
@@ -879,6 +1162,7 @@
 
       }
     );
+
   }
 
 
@@ -886,12 +1170,10 @@
      LAST UPDATED
   ========================================================= */
 
-  function initTimestamp() {
+  function initializeTimestamp() {
 
-    var element =
-      document.getElementById(
-        "lastUpdated"
-      );
+    const element =
+      getElement("lastUpdated");
 
 
     if (!element) {
@@ -901,12 +1183,11 @@
 
     function updateTimestamp() {
 
-      var now =
+      const now =
         new Date();
 
 
-      element.textContent =
-        "Updated " +
+      const time =
         now.toLocaleTimeString(
           [],
           {
@@ -914,6 +1195,11 @@
             minute: "2-digit"
           }
         );
+
+
+      element.textContent =
+        `UPDATED ${time}`;
+
     }
 
 
@@ -924,6 +1210,49 @@
       updateTimestamp,
       60000
     );
+
+  }
+
+
+  /* =========================================================
+     ACTIVE MARKET STATUS
+  ========================================================= */
+
+  function initializeMarketStatus() {
+
+    const status =
+      $(".live-status");
+
+
+    if (!status) {
+      return;
+    }
+
+
+    const dot =
+      $(".status-dot", status);
+
+
+    const text =
+      $("strong", status);
+
+
+    if (text) {
+
+      text.textContent =
+        "MARKETS ACTIVE";
+
+    }
+
+
+    if (dot) {
+
+      dot.classList.add(
+        "status-live"
+      );
+
+    }
+
   }
 
 
@@ -931,33 +1260,31 @@
      SMOOTH INTERNAL LINKS
   ========================================================= */
 
-  function initSmoothLinks() {
+  function initializeSmoothLinks() {
 
-    document.querySelectorAll(
-      'a[href^="#"]'
-    ).forEach(function (link) {
+    $$('a[href^="#"]').forEach(link => {
 
       link.addEventListener(
         "click",
-        function (event) {
+        event => {
 
-          var targetId =
+          const href =
             link.getAttribute(
               "href"
             );
 
 
           if (
-            !targetId ||
-            targetId === "#"
+            !href ||
+            href === "#"
           ) {
             return;
           }
 
 
-          var target =
+          const target =
             document.querySelector(
-              targetId
+              href
             );
 
 
@@ -974,150 +1301,88 @@
             block: "start"
           });
 
-
-          /*
-           * Update the URL hash without
-           * causing another jump.
-           */
-
-          if (
-            window.history &&
-            window.history.replaceState
-          ) {
-
-            window.history.replaceState(
-              null,
-              "",
-              targetId
-            );
-
-          }
-
         }
       );
 
     });
+
   }
 
 
   /* =========================================================
-     TRADINGVIEW ERROR FALLBACK
+     INITIALIZE TRADINGVIEW
   ========================================================= */
 
-  function addWidgetErrorStyles() {
-
-    if (
-      document.getElementById(
-        "proofOfMetalWidgetStyles"
-      )
-    ) {
-      return;
-    }
-
-
-    var style =
-      document.createElement(
-        "style"
-      );
-
-
-    style.id =
-      "proofOfMetalWidgetStyles";
-
-
-    style.textContent = `
-      .widget-error {
-        min-height: 160px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 20px;
-        text-align: center;
-        color: #8b949e;
-        background: rgba(255,255,255,0.02);
-        border: 1px dashed rgba(255,255,255,0.10);
-        font-size: 12px;
-      }
-
-      .widget-error strong {
-        color: #d9a928;
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .widget-error span {
-        color: #8b949e;
-        font-size: 10px;
-      }
-
-      body.modal-open {
-        overflow: hidden;
-      }
-    `;
-
-
-    document.head.appendChild(
-      style
-    );
-  }
-
-
-  /* =========================================================
-     INITIALIZATION
-  ========================================================= */
-
-  async function initializeProofOfMetal() {
-
-    /*
-     * These don't depend on TradingView,
-     * so initialize them immediately.
-     */
-
-    initNavigation();
-
-    initScrollSpy();
-
-    initTokenCompareButtons();
-
-    initDetailModal();
-
-    initTimestamp();
-
-    initSmoothLinks();
-
-    addWidgetErrorStyles();
-
-
-    /*
-     * TradingView-dependent functionality.
-     */
+  async function initializeCharts() {
 
     try {
 
       await waitForTradingView();
 
+      initializeLiveMarkets();
 
-      initMarketWidgets();
+      initializeComparison();
 
-      initComparisonTabs();
+      document.documentElement.classList.add(
+        "tradingview-ready"
+      );
 
     } catch (error) {
 
       console.error(
-        "Proof Of Metal initialization error:",
+        "Proof Of Metal:",
         error
       );
 
+
+      $$(".tv-mini, .token-chart, .comparison-widget")
+        .forEach(container => {
+
+          if (
+            !container.innerHTML.trim()
+          ) {
+
+            showWidgetMessage(
+              container,
+              "LIVE MARKET DATA UNAVAILABLE"
+            );
+
+          }
+
+        });
+
     }
+
   }
 
 
   /* =========================================================
-     START
+     APPLICATION INITIALIZATION
+  ========================================================= */
+
+  function initializeApp() {
+
+    initializeNavigation();
+
+    initializeScrollSpy();
+
+    initializeCompareButtons();
+
+    initializeModal();
+
+    initializeTimestamp();
+
+    initializeMarketStatus();
+
+    initializeSmoothLinks();
+
+    initializeCharts();
+
+  }
+
+
+  /* =========================================================
+     DOM READY
   ========================================================= */
 
   if (
@@ -1126,12 +1391,15 @@
 
     document.addEventListener(
       "DOMContentLoaded",
-      initializeProofOfMetal
+      initializeApp,
+      {
+        once: true
+      }
     );
 
   } else {
 
-    initializeProofOfMetal();
+    initializeApp();
 
   }
 
